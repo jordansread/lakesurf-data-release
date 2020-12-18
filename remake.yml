@@ -1,0 +1,44 @@
+packages:
+  - tidyverse
+  - meddle # at least v0.0.12
+  - scipiper
+  - readr
+  - sbtools
+  - sf
+
+include:
+  - 1_spatial.yml
+  - 2_observations.yml
+
+sources:
+  - src/sb_utils.R
+  - src/file_utils.R
+
+targets:
+  all:
+    depends:
+      - log/00_sb_posted_files.csv
+      - log/01_sb_posted_files.csv
+
+
+  out_xml/00_metadata.xml:
+    command: render(filename = target_name,
+      "in_text/text_data_release.yml",
+      spatial_metadata)
+
+  log/00_sb_posted_files.csv:
+    command: sb_replace_files(filename = target_name,
+      sb_id = I('5fdbf165d34e30b9123d2a20'),
+      "out_xml/00_metadata.xml",
+      sources = "src/sb_utils.R")
+
+  log/01_sb_posted_files.csv:
+    command: sb_replace_files(filename = target_name,
+      sb_id = I('5fdcb1c5d34e30b9123d2f23'),
+      "out_data/01_spatial.zip",
+      "out_data/01_lake_metadata.csv",
+      "out_xml/00_metadata.xml",
+      sources = "src/sb_utils.R")
+
+# 5fdbf185d34e30b9123d2a24 is 2_obs
+

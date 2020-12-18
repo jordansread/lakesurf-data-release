@@ -1,0 +1,30 @@
+
+
+target_default: 2_observations
+
+packages:
+  - yaml
+  - whisker
+  - dplyr
+  - tidyr
+  - meddle
+  - readr
+  - rgdal
+  - stringr
+  - glmtools
+  - sf
+
+
+sources:
+  - src/file_utils.R
+
+targets:
+  2_observations:
+    depends:
+      - out_data/temperature_observations.zip
+
+  modeled_lake_ids:
+    command: extract_model_ids('in_data/surface_temperature_obs.csv')
+
+  out_data/temperature_observations.zip:
+    command: zip_filter_obs(target_name, 'in_data/surface_temperature_obs.csv')

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>[NAME 1]</origin>
+        <origin>[NAME 2]</origin>
+        <pubdate>2020</pubdate>
+        <title>Data release: [your title here]</title>
+        <geoform>a single comma-delimited file and a single zipped shapefile</geoform>
+        <pubinfo>
+          <pubplace>Online (digital release)</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>https://doi.org/YY.XXXXX/XXXXXX</onlink>
+        <lworkcit>
+          <citeinfo>
+            <origin>Jordan S. Read</origin>
+            <origin>Xiaowei Jia</origin>
+            <origin>Jared Willard</origin>
+            <origin>Alison P. Appling</origin>
+            <origin>Jacob A. Zwart</origin>
+            <origin>Samantha K. Oliver</origin>
+            <origin>Anuj Karpatne</origin>
+            <origin>Gretchen J.A. Hansen</origin>
+            <origin>Paul C. Hanson</origin>
+            <origin>William Watkins</origin>
+            <origin>Michael Steinbach</origin>
+            <origin>Vipin Kumar</origin>
+            <pubdate>2019</pubdate>
+            <title>Process-guided deep learning predictions of lake water temperature</title>
+          </citeinfo>
+        </lworkcit>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>[a description of this data release]
+    </abstract>
+      <purpose>Fisheries biology, limnological research, and climate science.</purpose>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <rngdates>
+          <begdate>19800401</begdate>
+          <enddate>20191231</enddate>
+        </rngdates>
+      </timeinfo>
+      <current>See publication date</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>none planned</update>
+    </status>
+    <spdom>
+      <descgeog>Lake polygons as defined by the national hydrography dataset high resolution</descgeog>
+      <bounding>
+        <westbc>-103.750478482732</westbc>
+        <eastbc>-83.1398417813904</eastbc>
+        <northbc>49.3749961973185</northbc>
+        <southbc>37.1076610090681</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>none</themekt>
+        <themekey>machine learning</themekey>
+        <themekey>deep learning</themekey>
+        <themekey>hybrid modeling</themekey>
+        <themekey>water</themekey>
+        <themekey>temperature</themekey>
+        <themekey>temperate lakes</themekey>
+        <themekey>reservoirs</themekey>
+        <themekey>modeling</themekey>
+        <themekey>climate change</themekey>
+        <themekey>thermal profiles</themekey>
+      </theme>
+      <theme>
+        <themekt>ISO 19115 Topic Category</themekt>
+        <themekey>environment</themekey>
+        <themekey>inlandWaters</themekey>
+        <themekey>007</themekey>
+        <themekey>012</themekey>
+      </theme>
+      <place>
+        <placekt>Department of Commerce, 1995, Countries, Dependencies, Areas of Special Sovereignty, and Their Principal Administrative Divisions,  Federal Information Processing Standard (FIPS) 10-4, Washington, D.C., National Institute of Standards and Technology</placekt>
+        <placekey>United States</placekey>
+        <placekey>US</placekey>
+      </place>
+      <place>
+        <placekt>U.S. Department of Commerce, 1987, Codes for the identification of the States, the District of Columbia and the outlying areas of the United States, and associated areas (Federal Information Processing Standard 5-2): Washington, D. C., NIST</placekt>
+        <placekey>Illinois</placekey>
+        <placekey>IL</placekey>
+        <placekey>Indiana</placekey>
+        <placekey>IN</placekey>
+        <placekey>Iowa</placekey>
+        <placekey>IA</placekey>
+        <placekey>Michigan</placekey>
+        <placekey>MI</placekey>
+        <placekey>Minnesota</placekey>
+        <placekey>MN</placekey>
+        <placekey>North Dakota</placekey>
+        <placekey>ND</placekey>
+        <placekey>Ohio</placekey>
+        <placekey>OH</placekey>
+        <placekey>South Dakota</placekey>
+        <placekey>SD</placekey>
+        <placekey>Wisconsin</placekey>
+        <placekey>WI</placekey>
+      </place>
+    </keywords>
+    <accconst>none</accconst>
+    <useconst>These data are open access usable via creative commons as long as original data providers are acknowledged</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>Jordan S. Read</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntpos>Research Civil Engineer</cntpos>
+        <cntaddr>
+          <addrtype>Mailing and Physical</addrtype>
+          <address>8505 Research Way</address>
+          <city>Middleton</city>
+          <state>WI</state>
+          <postal>53562</postal>
+          <country>U.S.A.</country>
+        </cntaddr>
+        <cntvoice>608-821-3922</cntvoice>
+        <cntemail>jread@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <datacred>This study was funded by the [DETAILS HERE] This research used resources of the Core Science Analytics and Synthesis Advanced Research Computing program at the U.S. Geological Survey.</datacred>
+    <native>Multiple computer systems were used to generate these data, including linux, OSX. The open source languages R and Python were used on all systems.</native>
+    <crossref>
+      <citeinfo>
+        <origin>Luke A. Winslow</origin>
+        <origin>Gretchen J.A. Hansen</origin>
+        <origin>Jordan S. Read</origin>
+        <origin>Michael Notaro</origin>
+        <pubdate>2017</pubdate>
+        <title>Large-scale modeled contemporary and future water temperature estimates for 10,774 Midwestern U.S. Lakes</title>
+        <onlink>http://dx.doi.org/10.1038/sdata.2017.53</onlink>
+      </citeinfo>
+    </crossref>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>No formal attribute accuracy tests were conducted.</attraccr>
+    </attracc>
+    <logic>Not applicable</logic>
+    <complete>Not applicable</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>A formal accuracy assessment of the horizontal positional information in the dataset was not conducted.</horizpar>
+      </horizpa>
+      <vertacc>
+        <vertaccr>A formal accuracy assessment of the vertical positional information in the dataset was not conducted.</vertaccr>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <procstep>
+        <procdesc>[A description of processing]</procdesc>
+        <procdate>20201218</procdate>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <indspref>U.S.A.</indspref>
+    <direct>Vector</direct>
+    <ptvctinf>
+      <sdtsterm>
+        <sdtstype>G-polygon</sdtstype>
+        <ptvctcnt>2728</ptvctcnt>
+      </sdtsterm>
+    </ptvctinf>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <geograph>
+        <latres>1e-05</latres>
+        <longres>1e-05</longres>
+        <geogunit>Decimal degrees</geogunit>
+      </geograph>
+      <geodetic>
+        <horizdn>WGS84</horizdn>
+        <ellips>WGS_1984</ellips>
+        <semiaxis>6378137.0</semiaxis>
+        <denflat>298.257</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>example_cars.csv</enttypl>
+        <enttypd>A csv file containing important information...</enttypd>
+        <enttypds>U.S. Geological Survey</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>speed</attrlabl>
+        <attrdef>definition of column_name_1</attrdef>
+        <attrdefs>citation or URL of column_name_1. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>dist</attrlabl>
+        <attrdef>definition of column_name_2</attrdef>
+        <attrdefs>citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+    <detailed>
+      <enttyp>
+        <enttypl>example_shapefile.zip</enttypl>
+        <enttypd>A zip file containing...</enttypd>
+        <enttypds>U.S. Geological Survey</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>x</attrlabl>
+        <attrdef>definition of x</attrdef>
+        <attrdefs>citation or URL of x. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>TRUE</attrlabl>
+        <attrdef>definition of y</attrdef>
+        <attrdefs>citation or URL of y. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>z</attrlabl>
+        <attrdef>definition of z</attrdef>
+        <attrdefs>citation or URL of z. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey</cntorg>
+          <cntper>GS ScienceBase</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>Denver Federal Center, Building 810, Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80255</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Unless otherwise stated, all data, metadata and related materials are considered to satisfy the quality standards relative to the purpose for which the data were collected. Although these data and associated metadata have been reviewed for accuracy and completeness and approved for release by the U.S. Geological Survey (USGS), no warranty expressed or implied is made regarding the display or utility of the data on any other system or for general or scientific purposes, nor shall the act of distribution constitute any such warranty.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>a single comma-delimited file and a single zipped shapefile</formname>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://doi.org/YY.XXXXX/XXXXXX</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <fees>None</fees>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20201218</metd>
+    <metc>
+      <cntinfo>
+        <cntperp>
+          <cntper>Jordan S. Read</cntper>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntperp>
+        <cntpos>Research Civil Engineer</cntpos>
+        <cntaddr>
+          <addrtype>Mailing and Physical</addrtype>
+          <address>8505 Research Way</address>
+          <city>Middleton</city>
+          <state>WI</state>
+          <postal>53562</postal>
+          <country>U.S.A.</country>
+        </cntaddr>
+        <cntvoice>608-821-3921</cntvoice>
+        <cntfax>608-821-3817</cntfax>
+        <cntemail>jread@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>
