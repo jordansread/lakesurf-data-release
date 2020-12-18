@@ -19,6 +19,7 @@ targets:
     depends:
       - log/00_sb_posted_files.csv
       - log/01_sb_posted_files.csv
+      - log/02_sb_posted_files.csv
 
 
   out_xml/00_metadata.xml:
@@ -40,5 +41,10 @@ targets:
       "out_xml/00_metadata.xml",
       sources = "src/sb_utils.R")
 
-# 5fdbf185d34e30b9123d2a24 is 2_obs
+  log/02_sb_posted_files.csv:
+    command: sb_replace_files(filename = target_name,
+      sb_id = I('5fdbf185d34e30b9123d2a24'),
+      "out_data/temperature_observations.zip",
+      "out_xml/00_metadata.xml",
+      sources = "src/sb_utils.R")
 

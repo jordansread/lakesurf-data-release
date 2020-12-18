@@ -27,4 +27,4 @@ targets:
     command: extract_model_ids('in_data/surface_temperature_obs.csv')
 
   out_data/temperature_observations.zip:
-    command: zip_filter_obs(target_name, 'in_data/surface_temperature_obs.csv')
+    command: zip_this(target_name, 'in_data/surface_temperature_obs.csv')
