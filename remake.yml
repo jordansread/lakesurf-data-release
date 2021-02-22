@@ -18,8 +18,6 @@ targets:
   all:
     depends:
       - log/00_sb_posted_files.csv
-      - log/01_sb_posted_files.csv
-      - log/02_sb_posted_files.csv
 
 
   out_xml/00_metadata.xml:
@@ -29,7 +27,7 @@ targets:
 
   log/00_sb_posted_files.csv:
     command: sb_replace_files(filename = target_name,
-      sb_id = I('5fdbf165d34e30b9123d2a20'),
+      sb_id = I('60341c3ed34eb12031172aa6'),
       "out_xml/00_metadata.xml",
       sources = "src/sb_utils.R")
 
