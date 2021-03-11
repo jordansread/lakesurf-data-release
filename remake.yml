@@ -8,7 +8,6 @@ packages:
 
 include:
   - 1_spatial.yml
-  - 2_observations.yml
 
 sources:
   - src/sb_utils.R
@@ -20,7 +19,7 @@ targets:
       - log/00_sb_posted_files.csv
 
 
-  out_xml/00_metadata.xml:
+  out_xml/data_release_metadata.xml:
     command: render(filename = target_name,
       "in_text/text_data_release.yml",
       spatial_metadata)
@@ -28,21 +27,7 @@ targets:
   log/00_sb_posted_files.csv:
     command: sb_replace_files(filename = target_name,
       sb_id = I('60341c3ed34eb12031172aa6'),
-      "out_xml/00_metadata.xml",
+      "out_xml/data_release_metadata.xml",
+      "out_data/lake_metadata.csv",
+      "out_data/lake_surface_temp_obs.csv",
       sources = "src/sb_utils.R")
-
-  log/01_sb_posted_files.csv:
-    command: sb_replace_files(filename = target_name,
-      sb_id = I('5fdcb1c5d34e30b9123d2f23'),
-      "out_data/01_spatial.zip",
-      "out_data/01_lake_metadata.csv",
-      "out_xml/00_metadata.xml",
-      sources = "src/sb_utils.R")
-
-  log/02_sb_posted_files.csv:
-    command: sb_replace_files(filename = target_name,
-      sb_id = I('5fdbf185d34e30b9123d2a24'),
-      "out_data/temperature_observations.zip",
-      "out_xml/00_metadata.xml",
-      sources = "src/sb_utils.R")
-

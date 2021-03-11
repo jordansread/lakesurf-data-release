@@ -1,32 +1,23 @@
 title: >-
-  Data release: [your title here]
+  Data release: Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.
 
 
 abstract: >-
   [a description of this data release]
-      
-authors: ["[NAME 1]", "[NAME 2]"]
-pubdate: 2020 # replace with actual year, e.g., 2020
-doi: https://doi.org/YY.XXXXX/XXXXXX # replace with actual DOI
+
+authors: ["Jared Willard", "Jordan S. Read", "Vipin Kumar"]
+pubdate: 2021 # replace with actual year, e.g., 2020
+doi: https://doi.org/10.5066/P9CEMS0M
 
 build-environment: Multiple computer systems were used to generate these data, including linux, OSX. The open source languages R and Python were used on all systems.
 
 # ----associated publication----
 larger-cites:
   -
-    authors: ["Jordan S. Read", "Xiaowei Jia", "Jared Willard", "Alison P. Appling", "Jacob A. Zwart","Samantha K. Oliver","Anuj Karpatne","Gretchen J.A. Hansen", "Paul C. Hanson", "William Watkins", "Michael Steinbach","Vipin Kumar"]
+    authors: ["Jared Willard", "Jordan S. Read", "Vipin Kumar"]
     title: >-
-      Process-guided deep learning predictions of lake water temperature
-    pubdate: 2019
-
-# ----supporting publications----    
-cross-cites:
-  -
-    authors: ['Luke A. Winslow','Gretchen J.A. Hansen','Jordan S. Read','Michael Notaro']
-    title: >-
-      Large-scale modeled contemporary and future water temperature estimates for 10,774 Midwestern U.S. Lakes
-    pubdate: 2017
-    link: http://dx.doi.org/10.1038/sdata.2017.53
+      Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.
+    pubdate: 2021
 
 process-date: !expr format(Sys.time(),'%Y%m%d')
 file-format: a single comma-delimited file and a single zipped shapefile
@@ -63,7 +54,7 @@ entities:
         citation or URL of x. If citation, should appear in cross-cites. Can use NA or "This release"
       data-min: NA
       data-max: NA
-      data-units: NA  
+      data-units: NA
     -
       attr-label: y
       attr-def: definition of y
@@ -83,8 +74,8 @@ entities:
 
 
 purpose: Fisheries biology, limnological research, and climate science.
-start-date: 19800401
-end-date: 20191231
+start-date: 19800101
+end-date: 20201231
 
 update: none planned
 themekeywords: ["machine learning", "deep learning", "hybrid modeling", "water","temperature", "temperate lakes","reservoirs","modeling","climate change","thermal profiles"]
@@ -92,7 +83,7 @@ themekeywords: ["machine learning", "deep learning", "hybrid modeling", "water",
 usage-rules: >-
   These data are open access usable via creative commons as long as original data providers are acknowledged
 
-descgeog: "Lake polygons as defined by the national hydrography dataset high resolution"
+descgeog: "Lake centroids as defined by the national hydrography dataset high resolution"
 data-publisher: U.S. Geological Survey
 indirect-spatial: U.S.A.
 latitude-res: 0.00001

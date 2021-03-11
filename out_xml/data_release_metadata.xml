@@ -3,46 +3,37 @@
   <idinfo>
     <citation>
       <citeinfo>
-        <origin>[NAME 1]</origin>
-        <origin>[NAME 2]</origin>
-        <pubdate>2020</pubdate>
-        <title>Data release: [your title here]</title>
+        <origin>Jared Willard</origin>
+        <origin>Jordan S. Read</origin>
+        <origin>Vipin Kumar</origin>
+        <pubdate>2021</pubdate>
+        <title>Data release: Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.</title>
         <geoform>a single comma-delimited file and a single zipped shapefile</geoform>
         <pubinfo>
           <pubplace>Online (digital release)</pubplace>
           <publish>U.S. Geological Survey</publish>
         </pubinfo>
-        <onlink>https://doi.org/YY.XXXXX/XXXXXX</onlink>
+        <onlink>https://doi.org/10.5066/P9CEMS0M</onlink>
         <lworkcit>
           <citeinfo>
-            <origin>Jordan S. Read</origin>
-            <origin>Xiaowei Jia</origin>
             <origin>Jared Willard</origin>
-            <origin>Alison P. Appling</origin>
-            <origin>Jacob A. Zwart</origin>
-            <origin>Samantha K. Oliver</origin>
-            <origin>Anuj Karpatne</origin>
-            <origin>Gretchen J.A. Hansen</origin>
-            <origin>Paul C. Hanson</origin>
-            <origin>William Watkins</origin>
-            <origin>Michael Steinbach</origin>
+            <origin>Jordan S. Read</origin>
             <origin>Vipin Kumar</origin>
-            <pubdate>2019</pubdate>
-            <title>Process-guided deep learning predictions of lake water temperature</title>
+            <pubdate>2021</pubdate>
+            <title>Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.</title>
           </citeinfo>
         </lworkcit>
       </citeinfo>
     </citation>
     <descript>
-      <abstract>[a description of this data release]
-    </abstract>
+      <abstract>[a description of this data release]</abstract>
       <purpose>Fisheries biology, limnological research, and climate science.</purpose>
     </descript>
     <timeperd>
       <timeinfo>
         <rngdates>
-          <begdate>19800401</begdate>
-          <enddate>20191231</enddate>
+          <begdate>19800101</begdate>
+          <enddate>20201231</enddate>
         </rngdates>
       </timeinfo>
       <current>See publication date</current>
@@ -52,12 +43,12 @@
       <update>none planned</update>
     </status>
     <spdom>
-      <descgeog>Lake polygons as defined by the national hydrography dataset high resolution</descgeog>
+      <descgeog>Lake centroids as defined by the national hydrography dataset high resolution</descgeog>
       <bounding>
-        <westbc>-103.73744354455</westbc>
-        <eastbc>-83.1513607380376</eastbc>
-        <northbc>49.0520327175721</northbc>
-        <southbc>37.1382536400029</southbc>
+        <westbc>-124.828561110173</westbc>
+        <eastbc>-67.0031293966896</eastbc>
+        <northbc>50.5756943438636</northbc>
+        <southbc>25.0219575772361</southbc>
       </bounding>
     </spdom>
     <keywords>
@@ -78,8 +69,10 @@
         <themekt>ISO 19115 Topic Category</themekt>
         <themekey>environment</themekey>
         <themekey>inlandWaters</themekey>
-        <themekey>007</themekey>
-        <themekey>012</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Thesaurus</themekt>
+        <themekey>water resources</themekey>
       </theme>
       <place>
         <placekt>Department of Commerce, 1995, Countries, Dependencies, Areas of Special Sovereignty, and Their Principal Administrative Divisions,  Federal Information Processing Standard (FIPS) 10-4, Washington, D.C., National Institute of Standards and Technology</placekt>
@@ -88,20 +81,104 @@
       </place>
       <place>
         <placekt>U.S. Department of Commerce, 1987, Codes for the identification of the States, the District of Columbia and the outlying areas of the United States, and associated areas (Federal Information Processing Standard 5-2): Washington, D. C., NIST</placekt>
+        <placekey>Alabama</placekey>
+        <placekey>AL</placekey>
+        <placekey>Arizona</placekey>
+        <placekey>AZ</placekey>
+        <placekey>Arkansas</placekey>
+        <placekey>AR</placekey>
+        <placekey>California</placekey>
+        <placekey>CA</placekey>
+        <placekey>Colorado</placekey>
+        <placekey>CO</placekey>
+        <placekey>Connecticut</placekey>
+        <placekey>CT</placekey>
+        <placekey>Delaware</placekey>
+        <placekey>DE</placekey>
+        <placekey>District of Columbia</placekey>
+        <placekey>DC</placekey>
+        <placekey>Florida</placekey>
+        <placekey>FL</placekey>
+        <placekey>Georgia</placekey>
+        <placekey>GA</placekey>
+        <placekey>Idaho</placekey>
+        <placekey>ID</placekey>
         <placekey>Illinois</placekey>
         <placekey>IL</placekey>
+        <placekey>Indiana</placekey>
+        <placekey>IN</placekey>
         <placekey>Iowa</placekey>
         <placekey>IA</placekey>
+        <placekey>Kansas</placekey>
+        <placekey>KS</placekey>
+        <placekey>Kentucky</placekey>
+        <placekey>KY</placekey>
+        <placekey>Louisiana</placekey>
+        <placekey>LA</placekey>
+        <placekey>Maine</placekey>
+        <placekey>ME</placekey>
+        <placekey>Maryland</placekey>
+        <placekey>MD</placekey>
+        <placekey>Massachusetts</placekey>
+        <placekey>MA</placekey>
         <placekey>Michigan</placekey>
         <placekey>MI</placekey>
         <placekey>Minnesota</placekey>
         <placekey>MN</placekey>
+        <placekey>Mississippi</placekey>
+        <placekey>MS</placekey>
+        <placekey>Missouri</placekey>
+        <placekey>MO</placekey>
+        <placekey>Montana</placekey>
+        <placekey>MT</placekey>
+        <placekey>Nebraska</placekey>
+        <placekey>NE</placekey>
+        <placekey>Nevada</placekey>
+        <placekey>NV</placekey>
+        <placekey>New Hampshire</placekey>
+        <placekey>NH</placekey>
+        <placekey>New Jersey</placekey>
+        <placekey>NJ</placekey>
+        <placekey>New Mexico</placekey>
+        <placekey>NM</placekey>
+        <placekey>New York</placekey>
+        <placekey>NY</placekey>
+        <placekey>North Carolina</placekey>
+        <placekey>NC</placekey>
         <placekey>North Dakota</placekey>
         <placekey>ND</placekey>
+        <placekey>Ohio</placekey>
+        <placekey>OH</placekey>
+        <placekey>Oklahoma</placekey>
+        <placekey>OK</placekey>
+        <placekey>Oregon</placekey>
+        <placekey>OR</placekey>
+        <placekey>Pennsylvania</placekey>
+        <placekey>PA</placekey>
+        <placekey>Rhode Island</placekey>
+        <placekey>RI</placekey>
+        <placekey>South Carolina</placekey>
+        <placekey>SC</placekey>
         <placekey>South Dakota</placekey>
         <placekey>SD</placekey>
+        <placekey>Tennessee</placekey>
+        <placekey>TN</placekey>
+        <placekey>Texas</placekey>
+        <placekey>TX</placekey>
+        <placekey>Utah</placekey>
+        <placekey>UT</placekey>
+        <placekey>Vermont</placekey>
+        <placekey>VT</placekey>
+        <placekey>Virginia</placekey>
+        <placekey>VA</placekey>
+        <placekey>Washington</placekey>
+        <placekey>WA</placekey>
+        <placekey>West Virginia</placekey>
+        <placekey>WV</placekey>
         <placekey>Wisconsin</placekey>
         <placekey>WI</placekey>
+        <placekey>Wyoming</placekey>
+        <placekey>WY</placekey>
       </place>
     </keywords>
     <accconst>none</accconst>
@@ -127,17 +204,6 @@
     </ptcontac>
     <datacred>This study was funded by the [DETAILS HERE] This research used resources of the Core Science Analytics and Synthesis Advanced Research Computing program at the U.S. Geological Survey.</datacred>
     <native>Multiple computer systems were used to generate these data, including linux, OSX. The open source languages R and Python were used on all systems.</native>
-    <crossref>
-      <citeinfo>
-        <origin>Luke A. Winslow</origin>
-        <origin>Gretchen J.A. Hansen</origin>
-        <origin>Jordan S. Read</origin>
-        <origin>Michael Notaro</origin>
-        <pubdate>2017</pubdate>
-        <title>Large-scale modeled contemporary and future water temperature estimates for 10,774 Midwestern U.S. Lakes</title>
-        <onlink>http://dx.doi.org/10.1038/sdata.2017.53</onlink>
-      </citeinfo>
-    </crossref>
   </idinfo>
   <dataqual>
     <attracc>
@@ -156,7 +222,7 @@
     <lineage>
       <procstep>
         <procdesc>[A description of processing]</procdesc>
-        <procdate>20210222</procdate>
+        <procdate>20210311</procdate>
       </procstep>
     </lineage>
   </dataqual>
@@ -166,7 +232,7 @@
     <ptvctinf>
       <sdtsterm>
         <sdtstype>Point</sdtstype>
-        <ptvctcnt>2728</ptvctcnt>
+        <ptvctcnt>185550</ptvctcnt>
       </sdtsterm>
     </ptvctinf>
   </spdoinfo>
@@ -290,7 +356,7 @@
           <onlinopt>
             <computer>
               <networka>
-                <networkr>https://doi.org/YY.XXXXX/XXXXXX</networkr>
+                <networkr>https://doi.org/10.5066/P9CEMS0M</networkr>
               </networka>
             </computer>
           </onlinopt>
@@ -300,7 +366,7 @@
     </stdorder>
   </distinfo>
   <metainfo>
-    <metd>20210222</metd>
+    <metd>20210311</metd>
     <metc>
       <cntinfo>
         <cntperp>

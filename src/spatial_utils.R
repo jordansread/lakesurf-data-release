@@ -1,36 +1,22 @@
-subset_lake_sf <- function(lakes_sf_fl, site_ids){
-  readRDS(lakes_sf_fl) %>% filter(site_id %in% !!site_ids) %>% sf::st_zm()
+
+sf_centroid_metdata <- function(metadata_fl){
+  readr::read_csv(metadata_fl) %>%
+    st_as_sf(coords = c("lon", "lat"),
+             crs = 4326)
 }
 
 
-fetch_zip_url_sf <- function(zip_url, layer_name){
+create_site_group_grid <- function(centroids_sf, box_res){
+  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = c(-169,11)) %>%
+    st_sf(group_id = paste0('group_', 1:length(.)))
 
-  destination = tempfile(pattern = layer_name, fileext='.zip')
-  file <- GET(zip_url, write_disk(destination, overwrite=T), progress())
-  shp_path <- tempdir()
-  unzip(destination, exdir = shp_path)
+  # write file of buffers that fit in each box
+  # rows are centroids, columns are boxes. Contents are logicals:
+  box_df <- st_within(centroids_sf, bbox_grid, sparse = F) %>%
+    as_tibble(.name_repair = function(x){paste0('group_', seq_len(length(x)))}) %>%
+    summarize_all(sum) %>%
+    pivot_longer(cols = starts_with('group_'), names_to = 'group_id', values_to = 'site_total') %>%
+    filter(site_total > 0)
 
-  sf::st_read(shp_path, layer=layer_name) %>%
-    st_transform(crs = 4326) %>%
-    mutate(state = dataRetrieval::stateCdLookup(STATEFP)) %>%
-    dplyr::select(state, county = NAME)
-
-}
-
-
-sf_names_from_overlap <- function(sf_polys1, sf_polys2){
-
-  # will be some NA when the point isn't contained within the polgyon:
-  match_idx <- st_transform(sf_polys1, crs = "+init=epsg:2811") %>% sf::st_simplify(dTolerance = 40) %>%
-    st_transform(crs = st_crs(sf_polys2)) %>%
-    st_intersects(sf_polys2)
-
-  stopifnot(sum(sapply(match_idx, is.null)) == 0) # check that all poly1 have matches
-  purrr::map(1:nrow(sf_polys1),function(i){
-    info <- st_drop_geometry(sf_polys2[match_idx[[i]],])
-    cbind(st_drop_geometry(sf_polys1[i,]),
-          lapply(info, function(x) { # lapply across the data.frame columns, squash/combine values when > 1
-            paste(sort(unique(x)), collapse = '|')
-          }) %>% data.frame(stringsAsFactors = FALSE))
-  }) %>% purrr::reduce(bind_rows)
+  bbox_grid %>% inner_join(box_df)
 }
