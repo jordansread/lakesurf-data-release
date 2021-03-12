@@ -30,7 +30,7 @@ targets:
       layer_name = I('cb_2018_us_county_5m'))
 
   release_grid_sf:
-    command: create_site_group_grid(modeled_centroids_sf, box_res = 10)
+    command: create_site_group_grid(modeled_centroids_sf, box_res = 15)
 
   spatial_metadata:
     command: extract_feature(modeled_centroids_sf)

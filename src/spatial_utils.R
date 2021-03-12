@@ -7,7 +7,7 @@ sf_centroid_metdata <- function(metadata_fl){
 
 
 create_site_group_grid <- function(centroids_sf, box_res){
-  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = c(-169,11)) %>%
+  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = c(-170,8)) %>%
     st_sf(group_id = paste0('group_', 1:length(.)))
 
   # write file of buffers that fit in each box
