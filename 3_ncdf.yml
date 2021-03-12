@@ -1,0 +1,19 @@
+
+target_default: 3_ncdf
+
+packages:
+  - tidyverse
+  - scipiper
+  - ncdf4
+  - sf
+
+sources:
+  - src/ncdf_utils.R
+
+targets:
+  3_ncdf:
+    depends:
+      - out_data/weather_data_filehashes.yaml
+
+  out_data/weather_data_filehashes.yaml:
+    command: build_driver_nc(target_name, 'in_data/NLDAS_nc_dailies.yaml', cell_id_groups)
