@@ -1,17 +1,16 @@
 packages:
   - tidyverse
-  - meddle # at least v0.0.12
+  - meddle # at least v0.0.14
   - scipiper
-  - readr
   - sbtools
-  - sf
 
 include:
   - 1_spatial.yml
+  - 2_observations.yml
+  - 3_ncdf.yml
 
 sources:
   - src/sb_utils.R
-  - src/file_utils.R
 
 targets:
   all:

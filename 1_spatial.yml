@@ -29,18 +29,27 @@ targets:
     command: fetch_zip_url_sf(I('https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_5m.zip'),
       layer_name = I('cb_2018_us_county_5m'))
 
-  release_grid_sf:
-    command: create_site_group_grid(modeled_centroids_sf, box_res = 15)
-
   spatial_metadata:
     command: extract_feature(modeled_centroids_sf)
 
   modeled_centroids_sf:
     command: sf_centroid_metdata('out_data/lake_metadata.csv')
 
+  release_grid_sf:
+    command: create_site_group_grid(modeled_centroids_sf, box_res = 15)
+
+  site_id_groups:
+    command: assign_group_id(modeled_centroids_sf, release_grid_sf, use_col = I('site_id'))
+
+  cell_centroids:
+    command: create_ldas_centroids(x0 = I(-124.9375), y0 = I(25.0625), x_num = I(464), y_num = I(224), cell_res = I(0.125),
+      filter_to = modeled_centroids_sf)
+
+  cell_id_groups:
+    command: assign_group_id(cell_centroids, release_grid_sf, use_col = I('cell_id'))
   # next will need to add group to this...
   out_data/lake_metadata.csv:
-    command: file.copy(from = 'in_data/surface_lake_metadata_file.csv', to = target_name, overwrite = TRUE)
+    command: update_metadata_file(target_name, 'in_data/surface_lake_metadata_file.csv')
 
   out_data/lake_surface_temp_obs.csv:
     command: convert_feather_file(target_name, feather_fl = 'in_data/surface_lake_temp_daily.feather')
