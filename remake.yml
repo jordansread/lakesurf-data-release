@@ -29,4 +29,5 @@ targets:
       "out_xml/data_release_metadata.xml",
       "out_data/lake_metadata.csv",
       "out_data/lake_surface_temp_obs.csv",
+      file_hash = 'out_data/prediction_data_filehashes.yml',
       sources = "src/sb_utils.R")
