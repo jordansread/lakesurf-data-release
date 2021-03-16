@@ -18,6 +18,7 @@ targets:
       - log/00_sb_posted_files.csv
 
 
+  # also add https://drive.google.com/drive/u/1/folders/1tK4CY8qKRe29z9MP5swPzJk-GKkBLC3d data !!!!
   out_xml/data_release_metadata.xml:
     command: render(filename = target_name,
       "in_text/text_data_release.yml",

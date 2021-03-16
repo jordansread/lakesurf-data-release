@@ -45,7 +45,7 @@ targets:
     command: tibble(name = I('surftemp'),
       units = I('°C'),
       long_name = I('Surface water temperature [°C]'),
-      round_digits =)
+      round_digits = I(2))
 
   weather_id_groups:
     command: subset_tbl(metadata_tbl, I('group_id'), I('weather_id'), I('x'), I('y'),

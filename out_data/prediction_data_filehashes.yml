@@ -1,9 +1,6 @@
-tmp/group_3_predicted_temperature.nc: f58945eb0a557743e1a6f8e4d63d8fe0
-tmp/group_1_predicted_temperature.nc: 78ca6e9fff7ba4e65d660fa0a91bbfac
-tmp/group_2_predicted_temperature.nc: e7c9d5587487eeaa09b3c936dbae98df
-tmp/group_5_predicted_temperature.nc: a60cac8f4e6fb49272273d6b4a648512
-tmp/group_6_predicted_temperature.nc: 30e967de1c58a7559db1d159d7ef9a62
-tmp/group_8_predicted_temperature.nc: cddf37654563305dde6e6b91010c9bfe
-tmp/group_4_predicted_temperature.nc: 8917a484a75351f67aac3aaa5a2059b6
-tmp/group_7_predicted_temperature.nc: 975a2e85399d6937d88de064b2c15f89
+tmp/01_predicted_temp_N40-53_W98-126.nc4: 38c9b534d019939029774c40bf24c050
+tmp/02_predicted_temp_N24-40_W98-126.nc4: f0ad84fce529c447a8ea70d7958ac086
+tmp/03_predicted_temp_N40-53_W82-98.nc4: 51a9345e76f9558ba190b2b4b879ac62
+tmp/04_predicted_temp_N24-40_W82-98.nc4: 510b30981d97b8903f6e33c6821a451f
+tmp/05_predicted_temp_N24-53_W67-82.nc4: 6dcb34ed2675f38ad5569e2d35258299
 

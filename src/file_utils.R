@@ -40,7 +40,6 @@ subset_tbl <- function(tbl, ...){
 
 combine_hash_files <- function(hash_out, ...){
   hash_files <- c(...)
-  browser()
   lapply(hash_files, yaml::yaml.load_file) %>% unlist() %>% as.list() %>%
     yaml::write_yaml(hash_out)
 }
