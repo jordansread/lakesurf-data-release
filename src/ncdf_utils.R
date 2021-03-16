@@ -5,9 +5,9 @@
 #' @param hash_fileout the name of the hashtable file that contains info for the nc files created
 #' @param nc_hash_fl the file information for each of the full daily nc files
 #' @param cell_id_groups data.frame of group_ids and corresponding NLDAS indices
-build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups){
+build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_metadata){
 
-  out_pattern <- 'tmp/%s_weather_data.nc'
+  out_pattern <- 'tmp/%s_weather_%s.nc4'
 
   nc_files <-  tibble(filepath = file.path('../lake-surface-temperature-prep',
                                            names(yaml::yaml.load_file(nc_hash_fl)))) %>%
@@ -15,30 +15,49 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups){
 
   files_out <- c()
 
+
+
   for (this_group_id in unique(cell_id_groups$group_id)){
-    file_out <- sprintf(out_pattern, this_group_id)
+
+    these_cells <- filter(cell_id_groups, group_id == this_group_id)
+    group_bbox <- unique(these_cells$group_bbox)
+    file_out <- sprintf(out_pattern, this_group_id, group_bbox)
+    stopifnot(length(file_out) == 1)
     files_out <- c(files_out, file_out)
-    cell_ids <- filter(cell_id_groups, group_id == this_group_id) %>% pull(cell_id)
-    cell_x <- stringr::str_extract(cell_ids, '(?<=x_).+?(?=_)') %>% as.numeric()
-    cell_y <- stringr::str_extract(cell_ids, '(?<=y_).?(.*)') %>% as.numeric()
+
+    cell_x <- these_cells %>% pull(x)
+    cell_y <- these_cells %>% pull(y)
+    lat <- these_cells %>% pull(weather_lat_deg)
+    lon <- these_cells %>% pull(weather_lon_deg)
+    weather_id <- these_cells %>% pull(weather_id)
 
     # create the group netcdf file
-    dim_cell <- ncdim_def( "cell_index", "", 1:length(cell_ids)) # for this group
+    dim_cell <- ncdim_def( "weather_id", "", weather_id) # for this group
     message("Don't hardcode time for ", this_group_id)
-    dim_t <- ncdim_def( "Time", sprintf("days since %s", '2021-03-13'), 0:(15385-1), unlim=FALSE)
-    var_cell <- ncvar_def("cell_name", "",  list(dim_cell))
+    dim_t <- ncdim_def( "Time", sprintf("days since %s", '1979-01-01'), 0:(15385-1), unlim=FALSE)
+    var_lat_lon <- list(
+      ncvar_def("latitude", "degrees_north",  list(dim_cell)),
+      ncvar_def("longitude", "degrees_east",  list(dim_cell)))
 
     # initialize all variables here, plus cell index
-    message('add variable units and long names etc')
     var_values <- lapply(nc_files$variable, FUN = function(x){
-      ncvar_def(x, "unknown",  list(dim_cell, dim_t))
+      these_metadata <- filter(weather_metadata, name == x)
+      long_name <- pull(these_metadata, long_name)
+      units <- pull(these_metadata, units)
+      ncvar_def(x, units = units, longname = long_name, list(dim_cell, dim_t))
     })
-    #browser()
-    #var_cell <- list(ncvar_def('cell_name', "unknown",  list(dim_cell)))
+
     this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
-    group_nc_file <- nc_create(this_temp_file, var_values, force_v4 = TRUE)
+
+    group_nc_file <- nc_create(this_temp_file, append(var_values, var_lat_lon), force_v4 = TRUE)
+
+    ncvar_put(group_nc_file, varid = 'latitude', vals = lat,
+              start= 1, count = -1, verbose=FALSE)
+    ncvar_put(group_nc_file, varid = 'longitude', vals = lon,
+              start= 1, count = -1, verbose=FALSE)
 
     for (variable in nc_files$variable){
+
       # access the block defined by min/max x and min/max y and the time range needed
       nc <- nc_files %>% filter(variable == !!variable) %>%
         pull(filepath) %>% nc_open()
@@ -64,9 +83,6 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups){
       rm(these_data)
 
       # write this variable to the netcdf file:
-
-      #var_values <- ncvar_def(variable, "unknown",  list(dim_cell, dim_t))
-
       ncvar_put(group_nc_file, varid = variable, vals = sub_data,
                 start= c(1, 1), count = c(-1,  -1), verbose=FALSE)
       rm(sub_data)
@@ -86,26 +102,32 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups){
 }
 
 
-build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups){
-  out_pattern <- 'tmp/%s_predicted_temperature.nc'
+build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_metadata){
+  out_pattern <- 'tmp/%s_predicted_temp_%s.nc4'
 
 
   files_out <- c()
 
   for (this_group_id in unique(site_id_groups$group_id)){
-    file_out <- sprintf(out_pattern, this_group_id)
+
+    these_lakes <- filter(site_id_groups, group_id == this_group_id)
+    group_bbox <- unique(these_lakes$group_bbox)
+    file_out <- sprintf(out_pattern, this_group_id, group_bbox)
+    stopifnot(length(file_out) == 1)
+
     files_out <- c(files_out, file_out)
-    site_ids <- filter(site_id_groups, group_id == this_group_id) %>% pull(site_id)
+    site_ids <- pull(these_lakes, site_id)
+    predict_ids <- pull(these_lakes, predict_id)
 
     # instead, in the futre this should be a real continuous index...
-    dim_cell <- ncdim_def( "site_index", "", 1:length(site_ids)) # for this group
+    dim_cell <- ncdim_def( "predict_id", "", predict_ids) # for this group
     message("Don't hardcode time for ", this_group_id)
-    dim_t <- ncdim_def( "Time", sprintf("days since %s", '2021-03-13'), 0:(14976-1), unlim=FALSE)
-    var_cell <- ncvar_def("cell_name", "",  list(dim_cell))
+    dim_t <- ncdim_def( "Time", sprintf("days since %s", '1980-01-01'), 0:(14976-1), unlim=FALSE)
 
     # initialize all variables here, plus cell index
-    message('add variable units and long names etc')
-    var_values <- ncvar_def('surface_temperature', "degrees C",  list(dim_cell, dim_t))
+    var_values <- ncvar_def(name = predict_metadata$name,
+                            units = predict_metadata$units,
+                            longname = predict_metadata$long_name,  list(dim_cell, dim_t))
 
     this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
     group_nc_file <- nc_create(this_temp_file, var_values, force_v4 = TRUE)
@@ -117,7 +139,8 @@ build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups){
       site_id <- site_ids[i]
       # read this file in
 
-      this_slice <- arrow::read_feather(file.path(pred_dir, sprintf('outputs_%s.feather', site_id))) %>% pull(temp_pred)
+      this_slice <- arrow::read_feather(file.path(pred_dir, sprintf('outputs_%s.feather', site_id))) %>%
+        pull(temp_pred) %>% round(digits = predict_metadata$round_digits)
       if (length(this_slice) == nrow(data_out)){
         data_out[, i] <- this_slice
       } else {
@@ -128,7 +151,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups){
     }
     message(this_group_id, ' skipping ', length(skipped_ids), ' because they are incomplete')
     # write this variable to the netcdf file:
-    ncvar_put(group_nc_file, varid = 'surface_temperature', vals = data_out,
+    ncvar_put(group_nc_file, varid = predict_metadata$name, vals = data_out,
               start= c(1, 1), count = c(-1,  -1), verbose=FALSE)
     rm(data_out)
     nc_close(group_nc_file)

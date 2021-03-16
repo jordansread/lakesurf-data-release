@@ -1,9 +1,6 @@
-tmp/group_4_weather_data.nc: c3e880d00050b751231c81e9d1600f09
-tmp/group_3_weather_data.nc: c36f57d1454a0a26089581f542ba9467
-tmp/group_2_weather_data.nc: 6a22ad7eef68dc43c9a3af380335d5c6
-tmp/group_1_weather_data.nc: 63d380720402e082c3b029d6ff2628d2
-tmp/group_5_weather_data.nc: 96bde896ca1bb42d7319e4b507f0a48b
-tmp/group_6_weather_data.nc: c544afec5a1911523eaa0ba92f0a2c99
-tmp/group_7_weather_data.nc: 368dd45579fdd618ef3186f2a2298f85
-tmp/group_8_weather_data.nc: 3430855c1725a1df0257638ba4e5d362
+tmp/01_weather_N40-53_W98-126.nc4: 91840bec1636ba81151a6ef42e44c013
+tmp/02_weather_N24-40_W98-126.nc4: 515cd16380ef132fec4ccb34717d944d
+tmp/03_weather_N40-53_W82-98.nc4: 0e5735837c8767ae76db30521571d4fd
+tmp/04_weather_N24-40_W82-98.nc4: a409f02888dc6e4e37468a0fbc9398f8
+tmp/05_weather_N24-53_W67-82.nc4: 2e548d4a5d5da90578c7bfbc559867c4
 

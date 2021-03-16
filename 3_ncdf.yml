@@ -13,7 +13,7 @@ sources:
 targets:
   3_ncdf:
     depends:
-      - out_data/weather_data_filehashes.yaml
+      - out_data/netcdf_filehashes.yaml
 
   # to do:
   # - update this so cell_index is a continuous variable that runs throughout all groups and is included in the metadata
@@ -21,8 +21,42 @@ targets:
   # - clean up metadata with Blodgett advice
   # - create a joined table with variable information (e.g., units and long_name)
 
+  out_data/netcdf_filehashes.yaml:
+    command: combine_hash_files(target_name,
+      'out_data/weather_data_filehashes.yaml',
+      'out_data/prediction_data_filehashes.yml')
+
+
+  predict_id_groups:
+    command: subset_tbl(metadata_tbl, I('group_id'), I('predict_id'),
+      I('site_id'), I('lake_lon_deg'), I('lake_lat_deg'), I('group_bbox'))
+
+  weather_metadata:
+    command: tibble(name = I(c('dlwrfsfc','dswrfsfc','tmp2m','ugrd10m','vgrd10m')),
+      units = I(c('W/m^2','W/m^2','K','m/s','m/s')),
+      long_name = I(c(
+        'lw radiation flux downwards (surface) [w/m^2]',
+        'sw radiation flux downwards (surface) [w/m^2]',
+        '2-m above ground temperature [k]',
+        '10-m above ground zonal wind speed [m/s]',
+        '10-m above ground meridional wind speed [m/s]')))
+
+  predict_metadata:
+    command: tibble(name = I('surftemp'),
+      units = I('°C'),
+      long_name = I('Surface water temperature [°C]'),
+      round_digits =)
+
+  weather_id_groups:
+    command: subset_tbl(metadata_tbl, I('group_id'), I('weather_id'), I('x'), I('y'),
+      I('weather_lon_deg'), I('weather_lat_deg'), I('group_bbox'))
+
   out_data/weather_data_filehashes.yaml:
-    command: build_driver_nc(target_name, 'in_data/NLDAS_nc_dailies.yaml', cell_id_groups)
+    command: build_driver_nc(target_name, 'in_data/NLDAS_nc_dailies.yaml',
+      weather_id_groups,
+      weather_metadata)
 
   out_data/prediction_data_filehashes.yml:
-    command: build_prediction_nc(target_name, I('/Volumes/ThunderBlade/SWT_results'), site_id_groups)
+    command: build_prediction_nc(target_name, I('/Volumes/ThunderBlade/SWT_results'),
+      predict_id_groups,
+      predict_metadata)

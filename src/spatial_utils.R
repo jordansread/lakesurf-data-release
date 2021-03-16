@@ -1,13 +1,22 @@
 
-sf_centroid_metdata <- function(metadata_fl){
-  readr::read_csv(metadata_fl) %>%
-    st_as_sf(coords = c("lon", "lat"),
-             crs = 4326)
+
+fetch_zip_url_sf <- function(zip_url, layer_name){
+
+  destination = tempfile(pattern = layer_name, fileext='.zip')
+  file <- GET(zip_url, write_disk(destination, overwrite=T), progress())
+  shp_path <- tempdir()
+  unzip(destination, exdir = shp_path)
+
+  sf::st_read(shp_path, layer=layer_name) %>%
+    st_transform(crs = 4326) %>%
+    mutate(state = dataRetrieval::stateCdLookup(STATEFP)) %>%
+    dplyr::select(state, county = NAME)
+
 }
 
 
-create_site_group_grid <- function(centroids_sf, box_res){
-  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = c(-126,23)) %>%
+create_site_group_grid <- function(box_res, offset = c(-126,23)){
+  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = offset) %>%
     st_sf(group_id = paste0('group_', 1:length(.)))
 
   # write file of buffers that fit in each box
@@ -21,6 +30,29 @@ create_site_group_grid <- function(centroids_sf, box_res){
   bbox_grid %>% inner_join(box_df)
 }
 
+generate_group_rects <- function(){
+  unit_cell <- st_polygon(list(rbind(c(0,0), c(1,0), c(1,-1), c(0,-1), c(0,0))))
+  shift_scale <- function(shift = c(0,0), scale = 1){
+    (unit_cell * scale)+shift
+  }
+  group_rects <- st_sfc(crs = "+init=epsg:4326",
+                        shift_scale(c(-126,53), c(28,13)),
+                        shift_scale(c(-126,40), c(28,16)),
+                        shift_scale(c(-98, 53), c(16,13)),
+                        shift_scale(c(-98, 40), c(16,16)),
+                        shift_scale(c(-82, 53), c(15,29)))
+
+  groups <- data.frame(group_id = rep(NA_character_, length(group_rects)), stringsAsFactors = FALSE)
+  for (i in 1:length(group_rects)){
+    # format of N46.125-48.625_W86.5-89.25
+    this_box <- st_bbox(group_rects[i])
+    groups$group_id[i] <- sprintf("%02d", i)
+    groups$group_bbox[i] <- sprintf("N%1.0f-%1.0f_W%1.0f-%1.0f", this_box$ymin, this_box$ymax, -this_box$xmax, -this_box$xmin)
+  }
+
+  return(st_sf(groups, group_rects))
+
+}
 
 
 #' create a polygon cell grid from specifications. Assumes lat/lon data
@@ -34,15 +66,18 @@ create_site_group_grid <- function(centroids_sf, box_res){
 #'
 #' @return an sf data.frame with x and y attributes, specifying
 #' cell indices (0 indexed)
-create_ldas_centroids <- function(x0, y0, x_num, y_num, cell_res, filter_to){
+ldas_centroid_lat_lon <- function(x0, y0, x_num, y_num, cell_res){
   ldas_crs <- "+init=epsg:4326"
 
   ldas_grid_sfc <- sf::st_make_grid(cellsize = cell_res, n = c(x_num, y_num),
-                                    offset = c(x0-cell_res/2, y0-cell_res/2), crs = ldas_crs)
+                                    offset = c(x0-cell_res/2, y0-cell_res/2), crs = ldas_crs,
+                                    what = 'centers')
   # cells count left to right, then next row, then left to right
   x_cells <- rep(0:(x_num-1), y_num)
   y_cells <- c(sapply(0:(y_num-1), function(x) rep(x, x_num)))
 
-  st_sf(data.frame(cell_id = paste('x_',x_cells, '_y_',y_cells, sep = '')), ldas_grid_sfc) %>%
-    filter(cell_id %in% filter_to$cell_id) %>% st_centroid()
+  st_sf(data.frame(x = x_cells, y = y_cells), ldas_grid_sfc) %>%
+    dplyr::mutate(lat_cell = sf::st_coordinates(.)[,1],
+                  lon_cell = sf::st_coordinates(.)[,2]) %>%
+    st_drop_geometry()
 }
