@@ -43,15 +43,17 @@ targets:
   weather_centroids:
     command: ldas_centroid_lat_lon(x0 = I(-124.9375), y0 = I(25.0625), x_num = I(464), y_num = I(224), cell_res = I(0.125))
 
-#  cell_id_groups:
-#    command: assign_group_id(cell_centroids, release_grid_sf, use_col = I('cell_id'))
-  # next will need to add group to this...
+# need to add:
+# - n_obs instead of observed: TRUE/FALSE
+# - rmse_ealstm, rmse_xgboost, rmse_lm from "error_per_site.csv"
+# - 3fold_fold` `5fold_fold cluster ID
   metadata_tbl:
-    command: build_metadata(target_name, 'in_data/surface_lake_metadata_file.csv', release_grid_sf, weather_centroids)
+    command: build_metadata(target_name, 'in_data/surface_lake_metadata_file.csv',
+      error_fl = 'in_data/error_per_site.csv',
+      cluster_fl = 'in_data/Lake Clustering Metadata - Sheet1.csv',
+      release_grid_sf = release_grid_sf, weather_centroids = weather_centroids)
 
   out_data/lake_metadata.csv:
     command: subset_write(target_name, metadata_tbl, remove_cols = I(c('x','y')))
 
-  out_data/lake_surface_temp_obs.csv:
-    command: convert_feather_file(target_name, feather_fl = 'in_data/surface_lake_temp_daily.feather')
 
