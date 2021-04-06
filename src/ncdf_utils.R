@@ -83,7 +83,7 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
       rm(these_data)
 
       # write this variable to the netcdf file:
-      ncvar_put(group_nc_file, varid = variable, vals = sub_data,
+      ncvar_put(group_nc_file, varid = variable, vals = t(sub_data),
                 start= c(1, 1), count = c(-1,  -1), verbose=FALSE)
       rm(sub_data)
     }
@@ -102,14 +102,13 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
 }
 
 
-build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_metadata){
+build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_metadata, dummy){
   out_pattern <- 'tmp/%s_predicted_temp_%s.nc4'
 
 
   files_out <- c()
 
   for (this_group_id in unique(site_id_groups$group_id)){
-
     these_lakes <- filter(site_id_groups, group_id == this_group_id)
     group_bbox <- unique(these_lakes$group_bbox)
     file_out <- sprintf(out_pattern, this_group_id, group_bbox)
@@ -130,10 +129,13 @@ build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_
                             longname = predict_metadata$long_name,  list(dim_cell, dim_t))
 
     this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
+    if (file.exists(this_temp_file)){
+      unlink(this_temp_file)
+    }
     group_nc_file <- nc_create(this_temp_file, var_values, force_v4 = TRUE)
 
     # initialize 2D matrix to put in netcdf file
-    data_out <- matrix(rep(NA_real_, 14976 * length(site_ids)), nrow = 14976)
+    data_out <- matrix(rep(NA_real_, 14976 * length(site_ids)), nrow = length(site_ids))
     skipped_ids <- c()
     for (i in 1:length(site_ids)){
       site_id <- site_ids[i]
@@ -141,14 +143,16 @@ build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_
 
       this_slice <- arrow::read_feather(file.path(pred_dir, sprintf('outputs_%s.feather', site_id))) %>%
         pull(temp_pred) %>% round(digits = predict_metadata$round_digits)
-      if (length(this_slice) == nrow(data_out)){
-        data_out[, i] <- this_slice
+
+      if (length(this_slice) == ncol(data_out)){
+        data_out[i, ] <- this_slice
       } else {
         skipped_ids <- c(skipped_ids, site_id)
       }
 
 
     }
+
     message(this_group_id, ' skipping ', length(skipped_ids), ' because they are incomplete')
     # write this variable to the netcdf file:
     ncvar_put(group_nc_file, varid = predict_metadata$name, vals = data_out,

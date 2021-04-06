@@ -14,6 +14,7 @@ sf_centroid_metadata <- function(filein){
 convert_preds_file <- function(fileout, filein){
   read_csv(filein) %>%
     select(site_id,
+           Date,
            wtemp_EALSTM = `wtemp_predicted-ealstm`,
            wtemp_XGB = `wtemp_predicted-xgboost`,
            wtemp_LM = `wtemp_predicted-linear_model`,

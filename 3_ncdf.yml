@@ -58,5 +58,6 @@ targets:
 
   out_data/prediction_data_filehashes.yml:
     command: build_prediction_nc(target_name, I('/Volumes/ThunderBlade/SWT_results'),
+      dummy = I('2021-03-18'),
       predict_id_groups,
       predict_metadata)

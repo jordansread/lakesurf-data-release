@@ -47,6 +47,7 @@ targets:
 # - n_obs instead of observed: TRUE/FALSE
 # - rmse_ealstm, rmse_xgboost, rmse_lm from "error_per_site.csv"
 # - 3fold_fold` `5fold_fold cluster ID
+# TO DO!!! get num_obs from the other pred file, not from this metadata file!!
   metadata_tbl:
     command: build_metadata(target_name, 'in_data/surface_lake_metadata_file.csv',
       error_fl = 'in_data/error_per_site.csv',

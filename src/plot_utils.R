@@ -9,11 +9,11 @@ proj<-"+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +
 # prep data ------------------------------------------------------------
 
 ## temperature observation data
-sites_sf <- read.csv("temperature_counts_us.csv") %>%
-  filter(!is.na(longitude))%>%
-  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+sites_sf <- read.csv("out_data/lake_metadata.csv") %>%
+  filter(num_obs > 0) %>%
+  st_as_sf(coords = c("lake_lon_deg", "lake_lat_deg"), crs = 4326) %>%
   st_transform(proj)
-str(counts)
+#str(counts)
 
 # make hex grid -----------------------------------------------------------
 
@@ -38,7 +38,7 @@ site_hex <- site_grid %>%
   st_intersection(sites_sf) %>%
   st_drop_geometry() %>%
   group_by(hex) %>%
-  summarize(n_obs_hex = sum(n_obs),
+  summarize(n_obs_hex = sum(num_obs),
             n_sites = length(unique(site_id)))
 glimpse(site_hex)
 
@@ -47,12 +47,12 @@ sitey <- site_grid %>% left_join(site_hex, by='hex')
 
 # plot map ----------------------------------------------------------
 
-scale_breaks <- c(1,25000, 50000, 75000, 100000,  125000, 150000, 175000, 200000)
+scale_breaks <- c(1, 1000)
 
 sitey%>%
   ungroup()%>%
   ggplot()+
-  geom_sf(aes(fill=as.numeric(n_obs_hex)), color="black", size=.2) +
+  geom_sf(aes(fill=as.numeric(n_sites)), color="black", size=.2) +
   scale_fill_viridis_c(option='plasma',
                        breaks=scale_breaks,labels=scale_breaks,
                        direction=1, na.value=NA)+
