@@ -104,16 +104,19 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
 
 build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_pattern, site_id_groups, predict_metadata, dummy){
 
+  # need the expected range of time. Used to populate nc file and checked for each feather file.
   time_length <- diff(as.Date(export_range)) %>% as.numeric() + 1
 
   files_out <- c()
 
   for (this_group_id in unique(site_id_groups$group_id)){
+    # we have spatial groups, iterate through each group
     these_lakes <- filter(site_id_groups, group_id == this_group_id)
     group_bbox <- unique(these_lakes$group_bbox)
     file_out <- sprintf(out_pattern, this_group_id, group_bbox)
     stopifnot(length(file_out) == 1)
 
+    # pull out all of the data that will be part of writing this group's file:
     files_out <- c(files_out, file_out)
     site_ids <- pull(these_lakes, site_id)
     lats <- pull(these_lakes, lake_lat_deg)
@@ -121,14 +124,12 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     elevations <- pull(these_lakes, elevation_m)
     predict_ids <- pull(these_lakes, predict_id)
 
-
-
+    # pre-populate the matrix for data
     data_out <- matrix(rep(NA_real_, time_length * length(site_ids)), ncol = length(site_ids))
     skipped_ids <- c()
     for (i in 1:length(site_ids)){
       site_id <- site_ids[i]
       # read this file in
-
       this_slice <- arrow::read_feather(file.path(pred_dir, sprintf('outputs_%s.feather', site_id))) %>%
         pull(temp_pred)
 
@@ -138,9 +139,10 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
         skipped_ids <- c(skipped_ids, site_id)
       }
 
-
     }
+    # convert to data.frame since that is what the write_timeseries_dsg() file expects
     data_out <- as.data.frame(data_out) %>% setNames(site_ids)
+
     if (length(skipped_ids) > 0){
       stop(this_group_id, ' failing ', length(skipped_ids), ' because they are incomplete')
     }
@@ -162,11 +164,14 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
                                                     alt = "approximate elevation of lake surface"),
                          add_to_existing = FALSE, overwrite = TRUE)
 
-
+    # big matrix of data. Get rid of it since it is no longer needed. Probably uncessary.
     rm(data_out)
+
     # delete the new main target file if it already exists
     if (file.exists(file_out))
       unlink(file_out)
+
+    # better to run these ncdf commands from the directory of the files:
     old_dir <- setwd(dirname(file_out))
 
     # compress and quantize the file
