@@ -102,9 +102,9 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
 }
 
 
-build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_metadata, dummy){
-  out_pattern <- 'tmp/%s_predicted_temp_%s.nc4'
+build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_pattern, site_id_groups, predict_metadata, dummy){
 
+  time_length <- diff(as.Date(export_range)) %>% as.numeric() + 1
 
   files_out <- c()
 
@@ -116,56 +116,63 @@ build_prediction_nc <- function(hash_fileout, pred_dir, site_id_groups, predict_
 
     files_out <- c(files_out, file_out)
     site_ids <- pull(these_lakes, site_id)
+    lats <- pull(these_lakes, lake_lat_deg)
+    lons <- pull(these_lakes, lake_lon_deg)
+    elevations <- pull(these_lakes, elevation_m)
     predict_ids <- pull(these_lakes, predict_id)
 
-    # instead, in the futre this should be a real continuous index...
-    dim_cell <- ncdim_def( "predict_id", "", predict_ids) # for this group
-    message("Don't hardcode time for ", this_group_id)
-    dim_t <- ncdim_def( "Time", sprintf("days since %s", '1980-01-01'), 0:(14976-1), unlim=FALSE)
 
-    # initialize all variables here, plus cell index
-    var_values <- ncvar_def(name = predict_metadata$name,
-                            units = predict_metadata$units,
-                            longname = predict_metadata$long_name,  list(dim_cell, dim_t))
 
-    this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
-    if (file.exists(this_temp_file)){
-      unlink(this_temp_file)
-    }
-    group_nc_file <- nc_create(this_temp_file, var_values, force_v4 = TRUE)
-
-    # initialize 2D matrix to put in netcdf file
-    data_out <- matrix(rep(NA_real_, 14976 * length(site_ids)), nrow = length(site_ids))
+    data_out <- matrix(rep(NA_real_, time_length * length(site_ids)), ncol = length(site_ids))
     skipped_ids <- c()
     for (i in 1:length(site_ids)){
       site_id <- site_ids[i]
       # read this file in
 
       this_slice <- arrow::read_feather(file.path(pred_dir, sprintf('outputs_%s.feather', site_id))) %>%
-        pull(temp_pred) %>% round(digits = predict_metadata$round_digits)
+        pull(temp_pred)
 
-      if (length(this_slice) == ncol(data_out)){
-        data_out[i, ] <- this_slice
+      if (length(this_slice) == nrow(data_out)){
+        data_out[, i] <- this_slice
       } else {
         skipped_ids <- c(skipped_ids, site_id)
       }
 
 
     }
+    data_out <- as.data.frame(data_out) %>% setNames(site_ids)
+    if (length(skipped_ids) > 0){
+      stop(this_group_id, ' failing ', length(skipped_ids), ' because they are incomplete')
+    }
 
-    message(this_group_id, ' skipping ', length(skipped_ids), ' because they are incomplete')
+
+    this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
+    if (file.exists(this_temp_file)){
+      unlink(this_temp_file)
+    }
     # write this variable to the netcdf file:
-    ncvar_put(group_nc_file, varid = predict_metadata$name, vals = data_out,
-              start= c(1, 1), count = c(-1,  -1), verbose=FALSE)
+    write_timeseries_dsg(this_temp_file, instance_names = site_ids, lats = lats, lons = lons, alts = elevations,
+                         times = seq(as.POSIXct('1980-01-01', tz = 'GMT'), by = 'days', length.out = time_length),
+                         data = data_out,
+                         data_unit = rep(predict_metadata$units, length(site_ids)), data_prec = "double",
+                         data_metadata = list(name = predict_metadata$name, long_name = predict_metadata$long_name),
+                         time_units = "days since 1970-01-01 00:00:00", attributes = list(),
+                         coordvar_long_names = list(instance = "site_id", time = "date of prediction",
+                                                    lat = "latitude of lake centroid", lon = "longitude of lake centroid",
+                                                    alt = "approximate elevation of lake surface"),
+                         add_to_existing = FALSE, overwrite = TRUE)
+
+
     rm(data_out)
-    nc_close(group_nc_file)
     # delete the new main target file if it already exists
     if (file.exists(file_out))
       unlink(file_out)
     old_dir <- setwd(dirname(file_out))
-    # compress the file
-    system(sprintf("ncks -4 --cnk_plc=nco --cnk_map='rew' -L 1 %s %s",
-                   basename(this_temp_file), basename(file_out)))
+
+    # compress and quantize the file
+    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s=.1 %s %s",
+                   predict_metadata$name, basename(this_temp_file), basename(file_out)))
+
     setwd(old_dir)
     unlink(this_temp_file)
   }
