@@ -154,7 +154,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     }
     # write this variable to the netcdf file:
     write_timeseries_dsg(this_temp_file, instance_names = site_ids, lats = lats, lons = lons, alts = elevations,
-                         times = seq(as.POSIXct('1980-01-01', tz = 'GMT'), by = 'days', length.out = time_length),
+                         times = seq(as.POSIXct(export_range[1], tz = 'GMT'), by = 'days', length.out = time_length),
                          data = data_out,
                          data_unit = rep(predict_metadata$units, length(site_ids)), data_prec = "double",
                          data_metadata = list(name = predict_metadata$name, long_name = predict_metadata$long_name),
@@ -164,7 +164,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
                                                     alt = "approximate elevation of lake surface"),
                          add_to_existing = FALSE, overwrite = TRUE)
 
-    # big matrix of data. Get rid of it since it is no longer needed. Probably uncessary.
+    # big matrix of data. Get rid of it since it is no longer needed. Probably unnecessary.
     rm(data_out)
 
     # delete the new main target file if it already exists
@@ -175,11 +175,12 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     old_dir <- setwd(dirname(file_out))
 
     # compress and quantize the file
-    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s=.1 %s %s",
-                   predict_metadata$name, basename(this_temp_file), basename(file_out)))
+    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s=%s %s %s",
+                   predict_metadata$name, predict_metadata$precision, basename(this_temp_file), basename(file_out)))
 
     setwd(old_dir)
     unlink(this_temp_file)
   }
   sc_indicate(hash_fileout, data_file = files_out)
 }
+
