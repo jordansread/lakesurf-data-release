@@ -28,23 +28,27 @@ targets:
 
 
   predict_id_groups:
-    command: subset_tbl(metadata_tbl, I('group_id'), I('predict_id'),
+    command: subset_tbl(metadata_tbl, I('group_id'),
       I('site_id'), I('lake_lon_deg'), I('lake_lat_deg'), I('elevation_m'), I('group_bbox'))
 
   weather_metadata:
-    command: tibble(name = I(c('dlwrfsfc','dswrfsfc','tmp2m','ugrd10m','vgrd10m')),
+    command: tibble(
+      name = I(c('dlwrfsfc','dswrfsfc','tmp2m','ugrd10m','vgrd10m')),
       units = I(c('W/m^2','W/m^2','K','m/s','m/s')),
       long_name = I(c(
         'lw radiation flux downwards (surface) [w/m^2]',
         'sw radiation flux downwards (surface) [w/m^2]',
         '2-m above ground temperature [k]',
         '10-m above ground zonal wind speed [m/s]',
-        '10-m above ground meridional wind speed [m/s]')))
+        '10-m above ground meridional wind speed [m/s]')),
+      precision = I(c('.1','.1','.2','.3','.3')))
 
   predict_metadata:
-    command: tibble(name = I('surftemp'),
+    command: tibble(
+      name = I('surftemp'),
       units = I('°C'),
-      long_name = I('Surface water temperature [°C]'))
+      long_name = I('Surface water temperature [°C]'),
+      precision = I('.2'))
 
   weather_id_groups:
     command: subset_tbl(metadata_tbl, I('group_id'), I('weather_id'), I('x'), I('y'),
@@ -52,12 +56,14 @@ targets:
 
   out_data/weather_data_filehashes.yaml:
     command: build_driver_nc(target_name, 'in_data/NLDAS_nc_dailies.yaml',
+      export_range = I(c('1980-01-01','2020-12-31')),
+      out_pattern = I('tmp/%s_weather_%s.nc4'),
       weather_id_groups,
       weather_metadata)
 
   out_data/prediction_data_filehashes.yml:
     command: build_prediction_nc(target_name,
-      I('/Volumes/ThunderBlade/SWT_results'),
+      I('/Volumes/ThunderBlade/031821_SWT_results'),
       export_range = I(c('1980-01-01','2020-12-31')),
       out_pattern = I('tmp/%s_predicted_temp_%s.nc4'),
       dummy = I('2021-04-20'),

@@ -5,96 +5,84 @@
 #' @param hash_fileout the name of the hashtable file that contains info for the nc files created
 #' @param nc_hash_fl the file information for each of the full daily nc files
 #' @param cell_id_groups data.frame of group_ids and corresponding NLDAS indices
-build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_metadata){
+build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_metadata, export_range, out_pattern){
 
-  out_pattern <- 'tmp/%s_weather_%s.nc4'
 
-  nc_files <-  tibble(filepath = file.path('../lake-surface-temperature-prep',
+  nc_files <-  tibble(filepath = file.path('/Volumes/ThunderBlade/HOLDER_TEMP_R/lake-surface-temperature-prep',
                                            names(yaml::yaml.load_file(nc_hash_fl)))) %>%
     mutate(variable = stringr::str_extract(filepath, '(?<=var\\[).+?(?=\\])'))
 
   files_out <- c()
-
-
 
   for (this_group_id in unique(cell_id_groups$group_id)){
 
     these_cells <- filter(cell_id_groups, group_id == this_group_id)
     group_bbox <- unique(these_cells$group_bbox)
     file_out <- sprintf(out_pattern, this_group_id, group_bbox)
+    this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
     stopifnot(length(file_out) == 1)
     files_out <- c(files_out, file_out)
-
     cell_x <- these_cells %>% pull(x)
     cell_y <- these_cells %>% pull(y)
-    lat <- these_cells %>% pull(weather_lat_deg)
-    lon <- these_cells %>% pull(weather_lon_deg)
-    weather_id <- these_cells %>% pull(weather_id)
-
-    # create the group netcdf file
-    dim_cell <- ncdim_def( "weather_id", "", weather_id) # for this group
-    message("Don't hardcode time for ", this_group_id)
-    dim_t <- ncdim_def( "Time", sprintf("days since %s", '1979-01-01'), 0:(15385-1), unlim=FALSE)
-    var_lat_lon <- list(
-      ncvar_def("latitude", "degrees_north",  list(dim_cell)),
-      ncvar_def("longitude", "degrees_east",  list(dim_cell)))
-
-    # initialize all variables here, plus cell index
-    var_values <- lapply(nc_files$variable, FUN = function(x){
-      these_metadata <- filter(weather_metadata, name == x)
-      long_name <- pull(these_metadata, long_name)
-      units <- pull(these_metadata, units)
-      ncvar_def(x, units = units, longname = long_name, list(dim_cell, dim_t))
-    })
-
-    this_temp_file <- str_replace(file_out, pattern = '.nc', '_uncompressed.nc')
-
-    group_nc_file <- nc_create(this_temp_file, append(var_values, var_lat_lon), force_v4 = TRUE)
-
-    ncvar_put(group_nc_file, varid = 'latitude', vals = lat,
-              start= 1, count = -1, verbose=FALSE)
-    ncvar_put(group_nc_file, varid = 'longitude', vals = lon,
-              start= 1, count = -1, verbose=FALSE)
+    lats <- these_cells %>% pull(weather_lat_deg)
+    lons <- these_cells %>% pull(weather_lon_deg)
+    weather_ids <- these_cells %>% pull(weather_id)
+    if (file.exists(this_temp_file))
+      unlink(this_temp_file)
 
     for (variable in nc_files$variable){
-
+      variable_metadata <- weather_metadata %>% filter(name == variable)
       # access the block defined by min/max x and min/max y and the time range needed
       nc <- nc_files %>% filter(variable == !!variable) %>%
-        pull(filepath) %>% nc_open()
+        pull(filepath) %>% ncdf4::nc_open()
 
-      st_time <- 1 # needs to be proper filtered!!!
-      message('need to update time subsetting code to only export 1980-2020')
+
+      time_units <- ncdf4::ncatt_get(nc, 'Time')$units %>% stringr::str_remove("days since ")
+      times <- as.Date(time_units) + ncdf4::ncvar_get(nc, 'Time')
+      # subset export range:
+      st_time <- which(times == as.Date(export_range)[1])
+
       nc_x <- ncdf4::ncvar_get(nc, 'x')
       nc_y <- ncdf4::ncvar_get(nc, 'y')
       st_x <- which(nc_x == min(cell_x))
       st_y <- which(nc_y == min(cell_y))
       cnt_x <- range(cell_x) %>% diff %>% {. + 1}
       cnt_y <- range(cell_y) %>% diff %>% {. + 1}
-      these_data <- ncvar_get(nc, variable, start = c(st_x, st_y, st_time), count = c(cnt_x, cnt_y, -1))
-      nc_close(nc)
+      cnt_time <- as.Date(export_range) %>% diff %>% {. + 1} %>% as.numeric()
+      these_data <- ncdf4::ncvar_get(nc, variable, start = c(st_x, st_y, st_time), count = c(cnt_x, cnt_y, cnt_time))
+      ncdf4::nc_close(nc)
       # flatten 3D cube into 2D matrix by giving sparse x/y cell pairs
       # need to use mapply or matrix indexing for this otherwise it is length(x) * length(y) instead of just length(x)
       # used https://stackoverflow.com/questions/41384466/subset-matrix-with-arrays-in-r
       time_dim <- dim(these_data)[3]
       sub_index <- cbind(rep(cell_x - nc_x[st_x] + 1, each = time_dim),
                      rep(cell_y - nc_y[st_y] + 1, each = time_dim), 1:time_dim)
-      sub_data <- matrix(these_data[sub_index], nrow = time_dim)
+      sub_data <- matrix(these_data[sub_index], nrow = time_dim) %>% as.data.frame() %>% setNames(weather_ids)
       rm(sub_index)
       rm(these_data)
 
       # write this variable to the netcdf file:
-      ncvar_put(group_nc_file, varid = variable, vals = t(sub_data),
-                start= c(1, 1), count = c(-1,  -1), verbose=FALSE)
+      write_timeseries_dsg(this_temp_file, instance_names = weather_ids, lats = lats, lons = lons, alts = NA,
+                           times = seq(as.POSIXct(export_range[1], tz = 'GMT'), by = 'days', length.out = time_dim),
+                           data = sub_data,
+                           data_unit = rep(variable_metadata$units, length(weather_ids)), data_prec = "double",
+                           data_metadata = list(name = variable_metadata$name, long_name = variable_metadata$long_name),
+                           time_units = "days since 1970-01-01 00:00:00", attributes = list(),
+                           coordvar_long_names = list(instance = "weather_id", time = "date of prediction",
+                                                      lat = "latitude of grid cell centroid", lon = "longitude of grid cell centroid"),
+                           add_to_existing = ifelse(file.exists(this_temp_file), TRUE, FALSE), overwrite = TRUE)
+
       rm(sub_data)
     }
-    nc_close(group_nc_file)
     # delete the new main target file if it already exists
     if (file.exists(file_out))
       unlink(file_out)
     old_dir <- setwd(dirname(file_out))
-    # compress the file
-    system(sprintf("ncks -4 --cnk_plc=nco --cnk_map='rew' -L 1 %s %s",
-                   basename(this_temp_file), basename(file_out)))
+    # --ppc key1=val1#key2=val2
+    precision_args <- paste(paste(weather_metadata$name, weather_metadata$precision, sep = '='), collapse = '#')
+    # compress and quantize the file
+    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s %s %s",
+                   precision_args, basename(this_temp_file), basename(file_out)))
     setwd(old_dir)
     unlink(this_temp_file)
   }
@@ -122,7 +110,6 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     lats <- pull(these_lakes, lake_lat_deg)
     lons <- pull(these_lakes, lake_lon_deg)
     elevations <- pull(these_lakes, elevation_m)
-    predict_ids <- pull(these_lakes, predict_id)
 
     # pre-populate the matrix for data
     data_out <- matrix(rep(NA_real_, time_length * length(site_ids)), ncol = length(site_ids))

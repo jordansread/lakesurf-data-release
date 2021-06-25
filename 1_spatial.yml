@@ -50,7 +50,7 @@ targets:
 # TO DO!!! get num_obs from the other pred file, not from this metadata file!!
   metadata_tbl:
     command: build_metadata(target_name, 'in_data/surface_lake_metadata_file.csv',
-      error_fl = 'in_data/error_per_site.csv',
+      error_fl = 'in_data/error_per_site_031821.csv',
       cluster_fl = 'in_data/Lake Clustering Metadata - Sheet1.csv',
       release_grid_sf = release_grid_sf, weather_centroids = weather_centroids)
 

@@ -42,16 +42,15 @@ build_metadata <- function(fileout, orig_meta_fl, release_grid_sf, weather_centr
     left_join(cluster_data) %>%
     # now sort
     arrange(group_id, x, desc(y)) %>%
-    mutate(predict_id = row_number()) %>% group_by(group_id, x, desc(y)) %>%
-    mutate(weather_id = cur_group_id()) %>% ungroup() %>%
+    mutate(weather_id = sprintf('nldas_x%s_y%s', x, y)) %>%
     mutate(num_obs = case_when(
       is.na(num_obs) ~ 0,
       TRUE ~ num_obs
     )) %>%
-    select(site_id, predict_id, weather_id, group_id, num_obs, area_m2,
+    select(site_id, weather_id, num_obs, area_m2,
            elevation_m = elevation, lake_lon_deg = lon, lake_lat_deg = lat,
            weather_lon_deg = lon_cell, weather_lat_deg = lat_cell, num_obs,
-           x, y, RMSE_EALSTM, RMSE_XGB, RMSE_LM, cluster_id, group_bbox)
+           x, y, RMSE_EALSTM, RMSE_XGB, RMSE_LM, cluster_id, group_bbox, group_id)
 }
 
 subset_write <- function(fileout, tbl, remove_cols){
