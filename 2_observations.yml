@@ -26,7 +26,7 @@ targets:
   # add all_outputs_and_obs_error_estimate.csv, obs and pred for all three models
 
   out_data/lake_surface_temp_preds.csv:
-    command: convert_preds_file(target_name, 'in_data/all_outputs_and_obs_031821.csv')
+    command: convert_preds_file(target_name, 'in_data/all_outputs_and_obs_062321.csv')
 
   out_data/lake_surface_temp_obs.csv:
     command: convert_feather_file(target_name, feather_fl = 'in_data/surface_lake_temp_daily.feather')
