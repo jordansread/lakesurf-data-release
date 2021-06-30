@@ -91,13 +91,17 @@ plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
   dev.off()
 }
 
-plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
+plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, fresh_fl){
 
   min_obs <- 10 # minimum number of observations per cell to plot a color
   plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
 
   pred_obs <- read_csv(preds_obs_fl)
 
+  up_obs <- arrow::read_feather(fresh_fl) %>%
+    select(site_id, Date, new_temp = wtemp, source)
+
+  pred_obs <- left_join(pred_obs, up_obs)
 
   sites_sf <- read.csv(metadata_fl) %>%
     filter(num_obs > 0) %>%
@@ -119,11 +123,22 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
     st_drop_geometry() %>% select(cell_id, site_id) %>%
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
-    summarize(rmse = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm=TRUE)),
-              n = sum(!is.na(wtemp_EALSTM))) %>%
+    summarize(rmse = sqrt(mean((wtemp_EALSTM - new_temp)^2, na.rm=TRUE)),
+              n = sum(!is.na(new_temp))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = seq(0, 20, by = 0.5), right = F)) %>%
     left_join(col_tbl, by = 'bin')
+
+  # cell_obs %>% arrange(desc(rmse)) # to find the worst offenders
+  #
+  # get all the predictions so you can filter by cell_id
+  # pred_sites <- st_transform(sites_sf, plot_proj) %>%
+  #   st_intersection(site_grid, .) %>%
+  #   st_drop_geometry() %>% select(cell_id, site_id) %>%
+  #   right_join(pred_obs, by = 'site_id')
+  #
+  # filter by cell_id
+  # pred_sites %>% filter(cell_id == 877) %>% group_by(source) %>% summarize(rmse = sqrt(mean((wtemp_EALSTM - new_temp)^2, na.rm=TRUE)))
 
   usa_sf <- sf::st_transform(spData::us_states, crs = 4326) %>%
     st_as_sf() %>%
