@@ -77,7 +77,7 @@ ldas_centroid_lat_lon <- function(x0, y0, x_num, y_num, cell_res){
   y_cells <- c(sapply(0:(y_num-1), function(x) rep(x, x_num)))
 
   st_sf(data.frame(x = x_cells, y = y_cells), ldas_grid_sfc) %>%
-    dplyr::mutate(lat_cell = sf::st_coordinates(.)[,1],
-                  lon_cell = sf::st_coordinates(.)[,2]) %>%
+    dplyr::mutate(lat_cell = sf::st_coordinates(.)[,2],
+                  lon_cell = sf::st_coordinates(.)[,1]) %>%
     st_drop_geometry()
 }
