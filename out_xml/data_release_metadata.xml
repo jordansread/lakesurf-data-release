@@ -45,10 +45,10 @@
     <spdom>
       <descgeog>Lake centroids as defined by the national hydrography dataset high resolution</descgeog>
       <bounding>
-        <westbc>-124.828561110173</westbc>
-        <eastbc>-67.0031293966896</eastbc>
-        <northbc>50.5756943438636</northbc>
-        <southbc>25.0219575772361</southbc>
+        <westbc>-124.828561121738</westbc>
+        <eastbc>-67.0031262631403</eastbc>
+        <northbc>50.5756943434526</northbc>
+        <southbc>25.0219575726793</southbc>
       </bounding>
     </spdom>
     <keywords>
@@ -69,10 +69,8 @@
         <themekt>ISO 19115 Topic Category</themekt>
         <themekey>environment</themekey>
         <themekey>inlandWaters</themekey>
-      </theme>
-      <theme>
-        <themekt>USGS Thesaurus</themekt>
-        <themekey>water resources</themekey>
+        <themekey>007</themekey>
+        <themekey>012</themekey>
       </theme>
       <place>
         <placekt>Department of Commerce, 1995, Countries, Dependencies, Areas of Special Sovereignty, and Their Principal Administrative Divisions,  Federal Information Processing Standard (FIPS) 10-4, Washington, D.C., National Institute of Standards and Technology</placekt>
@@ -222,7 +220,7 @@
     <lineage>
       <procstep>
         <procdesc>[A description of processing]</procdesc>
-        <procdate>20210311</procdate>
+        <procdate>20210630</procdate>
       </procstep>
     </lineage>
   </dataqual>
@@ -366,7 +364,7 @@
     </stdorder>
   </distinfo>
   <metainfo>
-    <metd>20210311</metd>
+    <metd>20210630</metd>
     <metc>
       <cntinfo>
         <cntperp>

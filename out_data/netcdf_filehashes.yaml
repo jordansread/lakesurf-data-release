@@ -1,10 +1,5 @@
-tmp/01_weather_N40-53_W98-126.nc4: c9320b48f6fae3c3b08f0cbd7947563e
-tmp/02_weather_N24-40_W98-126.nc4: 4a3f095938d849c4a3d0a4c3f0cb3a38
-tmp/03_weather_N40-53_W82-98.nc4: cd801e8149df021a6479945d250eaeb8
-tmp/04_weather_N24-40_W82-98.nc4: 01d85a8d1ca9fd413021935ce6bb45a5
-tmp/05_weather_N24-53_W67-82.nc4: 0bb26f2be352e559f502fbb58816dec7
-tmp/01_predicted_temp_N40-53_W98-126.nc4: 21542475b825f3d7b0eba7b5568e0bf8
-tmp/02_predicted_temp_N24-40_W98-126.nc4: 8ec676dbec8914741e7afe3ed0d25877
-tmp/03_predicted_temp_N40-53_W82-98.nc4: f784ae95ce4c9fa0ccb81bf5d163adfe
-tmp/04_predicted_temp_N24-40_W82-98.nc4: 87b14e109e63c30163e3773f06b57299
-tmp/05_predicted_temp_N24-53_W67-82.nc4: c56a451990c00471654b9b2c7eb40e0b
+tmp/01_weather_N40-53_W98-126.nc4: a6606825dd3e4d0736eed06be66d6251
+tmp/02_weather_N24-40_W98-126.nc4: 820cdfcbbebcdfbdc22b8e3b28b00230
+tmp/03_weather_N40-53_W82-98.nc4: 07fa89f83680e43ee3ea0239db16455e
+tmp/04_weather_N24-40_W82-98.nc4: 8da146ac83d97225a7cef69dbd14138f
+tmp/05_weather_N24-53_W67-82.nc4: 6e4849f93302ab07ac53272386164e8c
