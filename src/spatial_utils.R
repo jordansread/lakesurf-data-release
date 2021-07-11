@@ -14,6 +14,36 @@ fetch_zip_url_sf <- function(zip_url, layer_name){
 
 }
 
+sf_grid_nc <- function(nc_file){
+  nc <- ncdf4::nc_open(nc_file)
+
+  lon <- ncdf4::ncvar_get(nc, 'longitude')
+  lat <- ncdf4::ncvar_get(nc, 'latitude')
+
+  ncdf4::nc_close(nc)
+
+  x0 <- lon[1]
+  y0 <- tail(lat, 1)
+
+  cell_res <- unique(diff(lon)) # is the same for both
+
+  stopifnot(cell_res == unique(-diff(lat)))
+
+  x_num <- length(lon)
+  y_num <- length(lat)
+
+  x_cells <- rep(1:(x_num), y_num)
+  y_cells <- c(sapply(1:(y_num), function(x) rep(x, x_num)))
+
+  sf::st_make_grid(cellsize = cell_res, n = c(x_num, y_num),
+                   offset = c(x0-cell_res/2, y0-cell_res/2),
+                   what = 'polygons') %>%
+    st_as_sf(crs = 4326) %>%
+    select(geometry=x) %>%
+    mutate(cell_id = row_number(), x = x_cells, y = y_cells)
+
+
+}
 
 create_site_group_grid <- function(box_res, offset = c(-126,23)){
   bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = offset) %>%
