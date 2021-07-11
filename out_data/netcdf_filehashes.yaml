@@ -3,3 +3,8 @@ tmp/02_weather_N24-40_W98-126.nc4: 820cdfcbbebcdfbdc22b8e3b28b00230
 tmp/03_weather_N40-53_W82-98.nc4: 07fa89f83680e43ee3ea0239db16455e
 tmp/04_weather_N24-40_W82-98.nc4: 8da146ac83d97225a7cef69dbd14138f
 tmp/05_weather_N24-53_W67-82.nc4: 6e4849f93302ab07ac53272386164e8c
+tmp/01_predicted_temp_N40-53_W98-126.nc4: 321e43397e0cf5cbd84a212b712b3925
+tmp/02_predicted_temp_N24-40_W98-126.nc4: eb1b4a73c658e4c495ae251bd1ebef97
+tmp/03_predicted_temp_N40-53_W82-98.nc4: 9f1d484ce2ef59d59ebf900f46fc27fe
+tmp/04_predicted_temp_N24-40_W82-98.nc4: abc3462011ed22e454bf86a5c034de4a
+tmp/05_predicted_temp_N24-53_W67-82.nc4: d2e5650f6135ee7a5b1a0a5d5ae67e48
