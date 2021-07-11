@@ -96,7 +96,6 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
   time_length <- diff(as.Date(export_range)) %>% as.numeric() + 1
 
   files_out <- c()
-
   for (this_group_id in unique(site_id_groups$group_id)){
     # we have spatial groups, iterate through each group
     these_lakes <- filter(site_id_groups, group_id == this_group_id)
@@ -162,6 +161,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     old_dir <- setwd(dirname(file_out))
 
     # compress and quantize the file
+
     system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s=%s %s %s",
                    predict_metadata$name, predict_metadata$precision, basename(this_temp_file), basename(file_out)))
 

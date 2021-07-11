@@ -18,16 +18,15 @@ sites_sf <- read.csv("out_data/lake_metadata.csv") %>%
 # make hex grid -----------------------------------------------------------
 
 ## spatially summarize state polygons to make map outline of usa
-usa_sf <- maps::map('usa', fill=TRUE)%>%
+usa_sf <- maps::map('usa', fill=TRUE) %>%
   st_as_sf() %>%
   st_transform(proj)
 
 ## make hex tesselation of CONUS
-columns <- 80
-rows <- 80
+
 site_grid <- usa_sf %>%
-  st_make_grid(n=c(columns,rows), what="polygons", square = FALSE)%>%
-  st_as_sf()%>%
+  st_make_grid(cellsize = 500000, what="polygons", square = FALSE) %>%
+  st_as_sf() %>%
   mutate(geometry=x) %>%
   mutate(hex  =  as.character(seq.int(nrow(.))))
 glimpse(site_grid)
@@ -39,6 +38,7 @@ site_hex <- site_grid %>%
   st_drop_geometry() %>%
   group_by(hex) %>%
   summarize(n_obs_hex = sum(num_obs),
+            med_rmse = ifelse(sum(!is.na(RMSE_EALSTM)) >= 3, median(RMSE_EALSTM, na.rm = TRUE), NA),
             n_sites = length(unique(site_id)))
 glimpse(site_hex)
 
@@ -52,13 +52,13 @@ scale_breaks <- c(1, 1000)
 sitey%>%
   ungroup()%>%
   ggplot()+
-  geom_sf(aes(fill=as.numeric(n_sites)), color="black", size=.2) +
-  scale_fill_viridis_c(option='plasma',
-                       breaks=scale_breaks,labels=scale_breaks,
+  geom_sf(aes(fill=as.numeric(med_rmse)), color=NA, size=.2) +
+  scale_fill_viridis_c(option='viridis',
+                       limits = c(0.5, 4),
                        direction=1, na.value=NA)+
   theme_void()+
   theme(legend.position="bottom",
-        plot.background = element_rect(fill="black"),
+        plot.background = element_rect(fill=NA),
         legend.text = element_text(color="white"),
         legend.title=element_text(color="white"))+
   guides(fill=guide_legend(title="Observations",
@@ -69,5 +69,4 @@ sitey%>%
                            ticks=FALSE,
                            direction = "horizontal"))
 
-ggsave("temp_hex_map.svg", width=32, height = 20)
 ggsave("temp_hex_map.png", width=32, height = 20)

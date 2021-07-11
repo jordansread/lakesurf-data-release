@@ -33,7 +33,7 @@ sf_grid_nc <- function(nc_file){
   y_num <- length(lat)
 
   x_cells <- rep(1:(x_num), y_num)
-  y_cells <- c(sapply(1:(y_num), function(x) rep(x, x_num)))
+  y_cells <- c(sapply(y_num:1, function(x) rep(x, x_num)))
 
   sf::st_make_grid(cellsize = cell_res, n = c(x_num, y_num),
                    offset = c(x0-cell_res/2, y0-cell_res/2),
