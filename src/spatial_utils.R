@@ -45,20 +45,6 @@ sf_grid_nc <- function(nc_file){
 
 }
 
-create_site_group_grid <- function(box_res, offset = c(-126,23)){
-  bbox_grid <- sf::st_make_grid(centroids_sf, square = TRUE, cellsize = box_res, offset = offset) %>%
-    st_sf(group_id = paste0('group_', 1:length(.)))
-
-  # write file of buffers that fit in each box
-  # rows are centroids, columns are boxes. Contents are logicals:
-  box_df <- st_within(centroids_sf, bbox_grid, sparse = F) %>%
-    as_tibble(.name_repair = function(x){paste0('group_', seq_len(length(x)))}) %>%
-    summarize_all(sum) %>%
-    pivot_longer(cols = starts_with('group_'), names_to = 'group_id', values_to = 'site_total') %>%
-    filter(site_total > 0)
-
-  bbox_grid %>% inner_join(box_df)
-}
 
 generate_group_rects <- function(){
   unit_cell <- st_polygon(list(rbind(c(0,0), c(1,0), c(1,-1), c(0,-1), c(0,0))))
