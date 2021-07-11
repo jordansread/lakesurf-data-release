@@ -97,3 +97,32 @@ ldas_centroid_lat_lon <- function(x0, y0, x_num, y_num, cell_res){
                   lon_cell = sf::st_coordinates(.)[,1]) %>%
     st_drop_geometry()
 }
+
+#' borrowed from lake-surface-temperature-prep, which uses this function to match NLDAS cells
+#' We'll use it here to match ERA5 cells to lakes. Same concept
+feature_cell_indices <- function(cell_grid, points){
+
+  cell_grid <- sf::st_set_crs(cell_grid, NA)
+  points <- sf::st_set_crs(points, NA)
+
+  chunk_size <- 1000
+  # filter points that are outside of the grid
+  within_grid <- st_within(points, cell_grid) %>% lengths() %>% {. > 0}
+  points <- points[within_grid, ]
+  n_points <- nrow(points)
+
+  chunk_start <- seq(1, to = n_points, by = chunk_size)
+  chunk_stop <- c(tail(chunk_start, -1L) - 1, n_points)
+
+  out_data <- tibble(site_id = rep(NA_character_, n_points),
+                     x = rep(NA_integer_, n_points),
+                     y = rep(NA_integer_, n_points))
+  for (chnk_i in 1:length(chunk_start)){
+    out_data[chunk_start[chnk_i]:chunk_stop[chnk_i], ] <- dplyr::do(points[chunk_start[chnk_i]:chunk_stop[chnk_i], ], data.frame(match_collection = st_intersects(cell_grid, st_geometry(.), sparse = FALSE))) %>%
+      mutate_all(which) %>% summarise_all(unique) %>%
+      tidyr::gather(key = cent_idx, value = grid_idx) %>%
+      mutate(x = cell_grid[grid_idx,]$x, y = cell_grid[grid_idx,]$y) %>%
+      mutate(site_id = points[chunk_start[chnk_i]:chunk_stop[chnk_i], ]$site_id) %>% select(site_id, x, y)
+  }
+  return(out_data)
+}

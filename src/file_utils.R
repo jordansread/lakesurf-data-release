@@ -11,15 +11,60 @@ sf_centroid_metadata <- function(filein){
            crs = 4326)
 }
 
-convert_preds_file <- function(fileout, filein){
+convert_preds_tibble <- function(filein){
   read_csv(filein) %>%
     select(site_id,
            Date,
            wtemp_EALSTM = `wtemp_predicted-ealstm`,
            wtemp_XGB = `wtemp_predicted-xgboost`,
            wtemp_LM = `wtemp_predicted-linear_model`,
-           wtemp_obs = wtemp_actual) %>%
-    write_csv(file = fileout)
+           wtemp_obs = wtemp_actual)
+}
+
+match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, obs_metadata){
+  # create a grid for the ERA5 data, which is gridded on a 0.25° lat/lon grid. Will use this to match lakes to the grid
+  era5_grid <- sf_grid_nc(nc_fl)
+
+  # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
+  expver <- 1
+  # add a row column so we know how to reassemble?
+  obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
+           era5_mixed_temp = NA_real_)
+
+  lake_pts <- st_as_sf(obs_metadata,
+                       coords = c("lake_lon_deg", "lake_lat_deg"),
+                       crs = 4326) %>%
+    filter(site_id %in% obs_pred$site_id)
+  # assign netcdf cell indices to each lake in the dataset:
+  era_cell_indices <- feature_cell_indices(cell_grid = era5_grid, lake_pts)
+
+  nc <- ncdf4::nc_open(nc_fl)
+
+  # relies on this file having units "hours since 1900-01-01 00:00:00.0"
+  nc_time <- as.character(as.Date('1900-01-01') + ncdf4::ncvar_get(nc, 'time')/24)
+
+  un_indices <- select(era_cell_indices, -site_id) %>% filter(!duplicated(.))
+  for (j in 1:nrow(un_indices)){
+    browser()
+    this_x <- un_indices[j,]$x
+    this_y <- un_indices[j,]$y
+    these_sites <- filter(era_cell_indices, x == this_x, y == this_y) %>%
+      pull(site_id)
+
+    these_data <- obs_pred %>% filter(site_id %in% these_sites) %>% select(-era5_mixed_temp)
+    # convert to celsius and access this single cell
+    replace_data <- tibble(Date = nc_time,
+           era5_mixed_temp = ncdf4::ncvar_get(
+             nc, 'lmlt',
+             start = c(this_x, this_y, expver, 1L),
+             count = c(1L, 1L, 1L, -1L))- 273.15) %>%
+      left_join(these_data, ., by = "Date")
+    obs_pred[replace_data$row_num, ] <- replace_data
+
+  }
+  nc_close(nc)
+  obs_pred %>% mutate(Date = as.Date(Date)) %>% select(-row_num) %>%
+    write_csv(fileout)
 }
 
 build_metadata <- function(fileout, orig_meta_fl, release_grid_sf, weather_centroids, error_fl, cluster_fl){
