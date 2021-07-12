@@ -95,10 +95,10 @@ plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
 
 plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, model_id){
 
-  min_obs <- 10 # minimum number of observations per cell to plot a color
+  min_obs <- 100 # minimum number of observations per cell to plot a color
   plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
 
-  pred_obs <- read_csv(preds_obs_fl)
+  pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
 
   sites_sf <- read.csv(metadata_fl) %>%
     filter(num_obs > 0) %>%
@@ -110,8 +110,8 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, 
     mutate(cell_id = row_number()) %>%
     st_transform(plot_proj)
 
-  bin_breaks <- c(seq(0, 4, by = 0.5), 20)
-  n_cols <- 9
+  bin_breaks <- c(0, seq(0.75, 4.5, by = 0.25), 20)
+  n_cols <- length(bin_breaks) - 1
 
   col_tbl <- tibble(val = bin_breaks,
          col = c(viridis::inferno(n = n_cols),
@@ -162,7 +162,7 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
 
   plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
 
-  pred_obs <- read_csv(preds_obs_fl)
+  pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
 
   sites_sf <- read.csv(metadata_fl) %>%
     filter(num_obs > 0) %>%
@@ -221,7 +221,7 @@ plot_accuracy <- function(fileout, preds_obs_fl, cellsize, model_id){
     select(geometry=x) %>%
     mutate(cell_id = row_number())
 
-  bin_breaks <- c(1, seq(10, 500, by = 10), 10000000000)
+  bin_breaks <- c(1, seq(10, 2000, by = 10), 10000000000)
   n_cols <- length(bin_breaks) - 1
 
   col_tbl <- tibble(val = bin_breaks,
@@ -235,9 +235,8 @@ plot_accuracy <- function(fileout, preds_obs_fl, cellsize, model_id){
 
 
   # lat is y, lon is x. Lon comes first:
-  acc_vals <- read_csv(preds_obs_fl) %>%
-    # shrink this for exploration:
-    #head(10000) %>%
+  acc_vals <- read_csv(preds_obs_fl, col_types = 'cDdddd') %>%
+    filter(!is.na(!!rlang::sym(model_id))) %>%
     st_as_sf(coords = c("wtemp_obs", model_id)) %>%
     st_intersection(acc_grid, .) %>%
     st_drop_geometry() %>% select(cell_id) %>%

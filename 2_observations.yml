@@ -26,7 +26,8 @@ targets:
   # add all_outputs_and_obs_error_estimate.csv, obs and pred for all three models
 
   lake_surface_temp_preds:
-    command: convert_preds_tibble('in_data/all_outputs_and_obs_071121_wBachmann.csv')
+    command: convert_preds_tibble('in_data/all_outputs_and_obs_071121_wBachmann.csv',
+      lm_fl = 'in_data/all_outputs_and_obs_071121_wBachmann_summerOnly.csv')
 
   obs_metadata:
     command: subset_tbl(metadata_tbl, I('site_id'),
@@ -37,7 +38,7 @@ targets:
   out_data/lake_surface_temp_preds.csv:
     command: match_era5_grid2obs(target_name, obs_pred = lake_surface_temp_preds,
       nc_fl = 'in_data/adaptor.mars.internal-1626051448.311538-8171-10-ef8eacb9-0624-4bde-8708-6f230b785a44.nc',
-      obs_metadata = obs_metadata)
+      centroids_sf = modeled_centroids_sf)
 
   out_data/lake_surface_temp_obs.csv:
     command: convert_feather_file(target_name, feather_fl = 'in_data/surface_lake_temp_daily.feather')

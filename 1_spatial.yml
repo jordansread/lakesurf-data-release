@@ -33,7 +33,7 @@ targets:
     command: extract_feature(modeled_centroids_sf)
 
   modeled_centroids_sf:
-    command: sf_centroid_metadata('out_data/lake_metadata.csv')
+    command: sf_centroid_metadata('in_data/surface_lake_metadata_file.csv')
 
 # make a grid that doesn't depend on the centroids
   release_grid_sf:
@@ -44,14 +44,19 @@ targets:
     command: ldas_centroid_lat_lon(x0 = I(-124.9375), y0 = I(25.0625), x_num = I(464), y_num = I(224), cell_res = I(0.125))
 
 # need to add:
-# - n_obs instead of observed: TRUE/FALSE
+# - ~n_obs instead of observed: TRUE/FALSE~
 # - rmse_ealstm, rmse_xgboost, rmse_lm from "error_per_site.csv"
-# - 3fold_fold` `5fold_fold cluster ID
+# - 3fold_fold` `5fold_fold ~cluster ID~ (this is the test fold ID)
+# - cluster ID from Jared
 # TO DO!!! get num_obs from the other pred file, not from this metadata file!!
+
+  site_errors:
+    command: calc_site_errors('out_data/lake_surface_temp_preds.csv')
+
   metadata_tbl:
     command: build_metadata(target_name, 'in_data/surface_lake_metadata_file.csv',
-      error_fl = 'in_data/err_per_site_wBachmann_071121.csv',
-      cluster_fl = 'in_data/Lake Clustering Metadata - Sheet1.csv',
+      error_data = site_errors,
+      cluster_fl = 'in_data/lake_metadata_wCluster.csv',
       release_grid_sf = release_grid_sf, weather_centroids = weather_centroids)
 
   out_data/lake_metadata.csv:

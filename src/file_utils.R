@@ -7,20 +7,22 @@ convert_feather_file <- function(fileout, feather_fl){
 }
 
 sf_centroid_metadata <- function(filein){
-  read_csv(filein) %>% st_as_sf(coords = c("lake_lon_deg", "lake_lat_deg"),
+  read_csv(filein) %>% st_as_sf(coords = c("lon", "lat"),
            crs = 4326)
 }
 
-convert_preds_tibble <- function(filein){
-  read_csv(filein) %>%
-    select(site_id,
-           Date,
-           wtemp_EALSTM = `wtemp_predicted-ealstm`,
-           wtemp_LM = `wtemp_predicted-linear_model`,
-           wtemp_obs = wtemp_actual)
+convert_preds_tibble <- function(filein, lm_fl){
+  # the lm_fl is just the summer bachmann model, so has a subset of the dates
+  bachmann_summer <- read_csv(lm_fl, col_types = "--Dc-d-") %>%
+    select(site_id, Date, wtemp_LM = `wtemp_predicted-linear_model`)
+
+  read_csv(filein, col_types = "--Dcd-d") %>%
+    select(site_id, Date, wtemp_EALSTM = `wtemp_predicted-ealstm`, wtemp_obs = wtemp_actual) %>%
+    left_join(bachmann_summer) %>%
+    relocate(wtemp_obs, .after = last_col())
 }
 
-match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, obs_metadata){
+match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
   # create a grid for the ERA5 data, which is gridded on a 0.25° lat/lon grid. Will use this to match lakes to the grid
   era5_grid <- sf_grid_nc(nc_fl)
 
@@ -30,9 +32,7 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, obs_metadata){
   obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
                      wtemp_ERA5 = NA_real_)
 
-  lake_pts <- st_as_sf(obs_metadata,
-                       coords = c("lake_lon_deg", "lake_lat_deg"),
-                       crs = 4326) %>%
+  lake_pts <- centroids_sf %>%
     filter(site_id %in% obs_pred$site_id)
   # assign netcdf cell indices to each lake in the dataset:
   era_cell_indices <- feature_cell_indices(cell_grid = era5_grid, lake_pts)
@@ -66,14 +66,22 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, obs_metadata){
     write_csv(fileout)
 }
 
-build_metadata <- function(fileout, orig_meta_fl, release_grid_sf, weather_centroids, error_fl, cluster_fl){
+rmse <- function(pred, obs){
+  sqrt(mean((pred - obs)^2, na.rm=TRUE))
+}
 
+calc_site_errors <- function(filein){
+  read_csv(filein, col_types = 'cDdddd') %>%
+    group_by(site_id) %>% summarize(
+      RMSE_EALSTM = rmse(wtemp_EALSTM, wtemp_obs),
+      RMSE_LM = rmse(wtemp_LM, wtemp_obs),
+      RMSE_ERA5 = rmse(wtemp_ERA5, wtemp_obs),
+      num_obs = length(Date))
 
-  error_data <- read_csv(error_fl) %>%
-    select(site_id, num_obs = n_obs, RMSE_EALSTM = rmse_ealstm, RMSE_LM = rmse_lm)
-  cluster_data <- read_csv(cluster_fl) %>%
-    select(site_id, cluster_id = `5fold_fold`) %>%
-    mutate(cluster_id = cluster_id + 1)
+}
+build_metadata <- function(fileout, orig_meta_fl, release_grid_sf, weather_centroids, error_data, cluster_fl){
+
+  cluster_data <- read_csv(cluster_fl, col_types = '--c-----------d--d')
 
   orig_metadata <- read_csv(orig_meta_fl)
 
@@ -88,13 +96,13 @@ build_metadata <- function(fileout, orig_meta_fl, release_grid_sf, weather_centr
     arrange(group_id, x, desc(y)) %>%
     mutate(weather_id = sprintf('nldas_x%s_y%s', x, y)) %>%
     mutate(num_obs = case_when(
-      is.na(num_obs) ~ 0,
+      is.na(num_obs) ~ 0L,
       TRUE ~ num_obs
     )) %>%
     select(site_id, weather_id, num_obs, area_m2,
            elevation_m = elevation, lake_lon_deg = lon, lake_lat_deg = lat,
            weather_lon_deg = lon_cell, weather_lat_deg = lat_cell, num_obs,
-           x, y, RMSE_EALSTM, RMSE_LM, cluster_id, group_bbox, group_id)
+           x, y, RMSE_EALSTM, RMSE_LM, RMSE_ERA5, cluster_id, fold_id, group_bbox, group_id)
 }
 
 subset_write <- function(fileout, tbl, remove_cols){

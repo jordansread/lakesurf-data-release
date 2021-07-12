@@ -55,17 +55,17 @@ targets:
   out_viz/raw_accuracy_EALSTM.png:
     command: plot_accuracy(target_name,
       preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      cellsize = 0.25,
+      cellsize = 0.5,
       model_id = I('wtemp_EALSTM'))
 
   out_viz/raw_accuracy_ERA5.png:
     command: plot_accuracy(target_name,
       preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      cellsize = 0.25,
+      cellsize = 0.5,
       model_id = I('wtemp_ERA5'))
 
   out_viz/raw_accuracy_LM.png:
     command: plot_accuracy(target_name,
       preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      cellsize = 0.25,
+      cellsize = 0.5,
       model_id = I('wtemp_LM'))
