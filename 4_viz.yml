@@ -15,7 +15,9 @@ targets:
     depends:
       - out_viz/time_season_accuracy.png
       - out_viz/data_coverage.png
-      - out_viz/spatial_accuracy.png
+      - out_viz/spatial_accuracy_EALSTM.png
+      - out_viz/spatial_accuracy_LM.png
+      - out_viz/spatial_accuracy_ERA5.png
       - out_viz/spatial_coverage.png
       - out_viz/raw_accuracy_EALSTM.png
       - out_viz/raw_accuracy_ERA5.png
@@ -32,10 +34,23 @@ targets:
       'out_data/lake_surface_temp_preds.csv',
       cellsize = 1)
 
-  out_viz/spatial_accuracy.png:
+  out_viz/spatial_accuracy_EALSTM.png:
     command: plot_spatial_accuracy(target_name, 'out_data/lake_metadata.csv',
       'out_data/lake_surface_temp_preds.csv',
-      cellsize = 1)
+      cellsize = 1,
+      model_id = I('wtemp_EALSTM'))
+
+  out_viz/spatial_accuracy_LM.png:
+    command: plot_spatial_accuracy(target_name, 'out_data/lake_metadata.csv',
+      'out_data/lake_surface_temp_preds.csv',
+      cellsize = 1,
+      model_id = I('wtemp_LM'))
+
+  out_viz/spatial_accuracy_ERA5.png:
+    command: plot_spatial_accuracy(target_name, 'out_data/lake_metadata.csv',
+      'out_data/lake_surface_temp_preds.csv',
+      cellsize = 1,
+      model_id = I('wtemp_ERA5'))
 
   out_viz/raw_accuracy_EALSTM.png:
     command: plot_accuracy(target_name,

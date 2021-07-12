@@ -93,7 +93,7 @@ plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
   dev.off()
 }
 
-plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
+plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, model_id){
 
   min_obs <- 10 # minimum number of observations per cell to plot a color
   plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
@@ -126,7 +126,7 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
     st_drop_geometry() %>% select(cell_id, site_id) %>%
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
-    summarize(rmse = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm=TRUE)),
+    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs)^2, na.rm=TRUE)),
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
