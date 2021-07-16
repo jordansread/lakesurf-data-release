@@ -8,7 +8,8 @@
 build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_metadata, export_range, out_pattern){
 
 
-  nc_files <-  tibble(filepath = file.path('/Volumes/ThunderBlade/HOLDER_TEMP_R/lake-surface-temperature-prep',
+  instance_dim_name <- 'weather_id'
+  nc_files <-  tibble(filepath = file.path('/Volumes/ThunderBlade 1/HOLDER_TEMP_R/lake-surface-temperature-prep',
                                            names(yaml::yaml.load_file(nc_hash_fl)))) %>%
     mutate(variable = stringr::str_extract(filepath, '(?<=var\\[).+?(?=\\])'))
 
@@ -67,8 +68,10 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
                            data = sub_data,
                            data_unit = rep(variable_metadata$units, length(weather_ids)), data_prec = "double",
                            data_metadata = list(name = variable_metadata$name, long_name = variable_metadata$long_name),
+                           instance_dim_name = instance_dim_name,
+                           dsg_timeseries_id = instance_dim_name,
                            time_units = "days since 1970-01-01 00:00:00", attributes = list(),
-                           coordvar_long_names = list(instance = "weather_id", time = "date of prediction",
+                           coordvar_long_names = list(instance = "identifier for weather grid cell", time = "date of prediction",
                                                       lat = "latitude of grid cell centroid", lon = "longitude of grid cell centroid"),
                            add_to_existing = ifelse(file.exists(this_temp_file), TRUE, FALSE), overwrite = TRUE)
 
@@ -81,7 +84,7 @@ build_driver_nc <- function(hash_fileout, nc_hash_fl, cell_id_groups, weather_me
     # --ppc key1=val1#key2=val2
     precision_args <- paste(paste(weather_metadata$name, weather_metadata$precision, sep = '='), collapse = '#')
     # compress and quantize the file
-    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s %s %s",
+    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn time,10 --ppc %s %s %s",
                    precision_args, basename(this_temp_file), basename(file_out)))
     setwd(old_dir)
     unlink(this_temp_file)
@@ -94,7 +97,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
 
   # need the expected range of time. Used to populate nc file and checked for each feather file.
   time_length <- diff(as.Date(export_range)) %>% as.numeric() + 1
-
+  instance_dim_name <- 'site_id'
   files_out <- c()
   for (this_group_id in unique(site_id_groups$group_id)){
     # we have spatial groups, iterate through each group
@@ -145,7 +148,9 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
                          data_unit = rep(predict_metadata$units, length(site_ids)), data_prec = "double",
                          data_metadata = list(name = predict_metadata$name, long_name = predict_metadata$long_name),
                          time_units = "days since 1970-01-01 00:00:00", attributes = list(),
-                         coordvar_long_names = list(instance = "site_id", time = "date of prediction",
+                         instance_dim_name = instance_dim_name,
+                         dsg_timeseries_id = instance_dim_name,
+                         coordvar_long_names = list(instance = "identifier for the lake location; NHDHR PermID", time = "date of prediction",
                                                     lat = "latitude of lake centroid", lon = "longitude of lake centroid",
                                                     alt = "approximate elevation of lake surface"),
                          add_to_existing = FALSE, overwrite = TRUE)
@@ -162,7 +167,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
 
     # compress and quantize the file
 
-    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn instance,10 --cnk_dmn time,10 --ppc %s=%s %s %s",
+    system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn time,10 --ppc %s=%s %s %s",
                    predict_metadata$name, predict_metadata$precision, basename(this_temp_file), basename(file_out)))
 
     setwd(old_dir)
