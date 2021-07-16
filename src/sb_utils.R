@@ -106,7 +106,8 @@ upload_and_record <- function(sb_id, filepath) {
   sb_secret_login()
 
   # Second, upload the file
-  item_replace_files(sb_id, files = filepath)
+  scrape_file <- tools::file_ext(filepath) %in% c('xml')
+  item_replace_files(sb_id, files = filepath, scrape_files = scrape_file)
 
   timestamp <- Sys.time()
   attr(timestamp, "tzone") <- "UTC"

@@ -29,6 +29,5 @@ targets:
       "out_xml/data_release_metadata.xml",
       "out_data/lake_metadata.csv",
       "out_data/lake_surface_temp_preds.csv",
-      "out_data/lake_surface_temp_obs.csv",
       file_hash = 'out_data/netcdf_filehashes.yaml',
       sources = "src/sb_utils.R")
