@@ -5,7 +5,7 @@ title: >-
 abstract: >-
   [a description of this data release]
 
-authors: ["Jared Willard", "Jordan S. Read", "Vipin Kumar"]
+authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen","Vipin Kumar"]
 pubdate: 2021 # replace with actual year, e.g., 2020
 doi: https://doi.org/10.5066/P9CEMS0M
 
@@ -14,60 +14,337 @@ build-environment: Multiple computer systems were used to generate these data, i
 # ----associated publication----
 larger-cites:
   -
-    authors: ["Jared Willard", "Jordan S. Read", "Vipin Kumar"]
+    authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen", "Vipin Kumar"]
     title: >-
       Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.
     pubdate: 2021
+    form: publication
+  -
+    authors: ["Frederik Kratzert","Daniel Klotz","Guy Shalev", "Günter Klambauer", "Sepp Hochreiter", "Grey Nearing"]
+    title: >-
+      Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets
+    pubdate: 2019
+    doi: https://doi.org/10.5194/hess-23-5089-2019
+  -
+    authors: ['Kenneth E. Mitchell','Dag Lohmann','Paul R. Houser','Eric F. Wood','John C. Schaake','Alan Robock','Brian A. Cosgrove','Justin Sheffield','Qingyun Duan','Lifeng Luo','R. Wayne Higgins','Rachel T. Pinker','J. Dan Tarpley','Dennis P. Lettenmaier','Curtis H. Marshall','Jared K. Entin','Ming Pan','Wei Shi','Victor Koren','Jesse Meng','Bruce H. Ramsay','Andrew A. Bailey']
+    title: >-
+      The multi-institution North American Land Data Assimilation System (NLDAS): Utilizing multiple GCIP products and partners in a continental distributed hydrological modeling system
+    pubdate: 2004
+    form: publication
+    link: http://dx.doi.org/10.1029/2003JD003823
+  -
+    authors: ["Jeffrey Hollister","Tarak Shah", "Alec L. Robitaille", "Marcus W. Beck", "Mike Johnson"]
+    title: >-
+      elevatr: Access Elevation Data from Various APIs
+    pubdate: 2020
+    form: R package
+    doi: doi:10.5281/zenodo.4282962
+  -
+    authors: ["Roger W. Bachmann", "Sapna Sharma", "Daniel E. Canfield, Jr", "Vincent Lecours"]
+    title: >-
+      The Distribution and Prediction of Summer Near-Surface Water Temperatures in Lakes of the Coterminous United States and Southern Canada
+    pubdate: 2019
+    form: publication
+    link: https://doi.org/10.3390/geosciences9070296
+  -
+    authors: ["Hans Hersbach", "Bill Bell", "Paul Berrisford", "Shoji Hirahara", "András Horányi", "Joaquín Muñoz-Sabater",
+      "Julien Nicolas", "Carole Peubey", "Raluca Radu", "Dinand Schepers", "Adrian Simmons", "Cornel Soci", "Saleh Abdalla",
+      "Xavier Abellan", "Gianpaolo Balsamo", "Peter Bechtold", "Gionata Biavati", "Jean Bidlot", "Massimo Bonavita", "Giovanna De Chiara",
+      "Per Dahlgren", "Dick Dee", "Michail Diamantakis", "Rossana Dragani", "Johannes Flemming", "Richard Forbes", "Manuel Fuentes",
+      "Alan Geer", "Leo Haimberger", "Sean Healy", "Robin J. Hogan", "Elías Hólm", "Marta Janisková", "Sarah Keeley", "Patrick Laloyaux",
+      "Philippe Lopez", "Cristina Lupu", "Gabor Radnoti", "Patricia de Rosnay", "Iryna Rozum", "Freja Vamborg", "Sebastien Villaume", "Jean-Noël Thépaut"]
+    title: >-
+      The ERA5 global reanalysis
+    pubdate: 2020
+    form: publication
+    link: https://doi.org/10.1002/qj.3803
 
 process-date: !expr format(Sys.time(),'%Y%m%d')
 file-format: a single comma-delimited file and a single zipped shapefile
 
 entities:
   -
-    data-name: example_cars.csv
-    data-description: A csv file containing important information...
+    data-name: 01_predicted_temp_N24-53_W98-126.nc
+    data-description: >-
+      A netcdf file containing daily surface water temperature predictions for 62,560 U.S. lakes located
+      between 24°N to 53°N and -98°E to -126°E from 1980-2020. Predictions were made using the EA-LSTM model
+      as described in Kratzert et al., 2019 and applied to lake prediction in Willard et al., 2021
     attributes:
     -
-      attr-label: speed
-      attr-def: definition of column_name_1
+      attr-label: site_id
+      attr-def: >-
+        Lake identification number for this dataset. Is the Prmnn_I prefixed with source, as "nhdhr_{Prmnn_I}"
       attr-defs: >-
-        citation or URL of column_name_1. If citation, should appear in cross-cites. Can use NA or "This release"
+        http://nhd.usgs.gov/
       data-min: NA
       data-max: NA
       data-units: NA
     -
-      attr-label: dist
-      attr-def: definition of column_name_2
+      attr-label: surftemp
+      attr-def: Predicted daily lake surface temperature from the entity-aware long short term memory (EA-LSTM) network model
+      attr-defs: >-
+        This release; Willard et al., 2021; Kratzert et al., 2019
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: alt
+      attr-def: Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake
+      attr-defs: >-
+        Hollister et al., 2020
+      data-min: -85
+      data-max: 3922
+      data-units: meters
+    -
+      attr-label: lat
+      attr-def: latitude of lake centroid
       attr-defs: >-
         citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"
+      data-min: 25.77701
+      data-max: 50.57569
+      data-units: decimal-degrees north
+    -
+      attr-label: lon
+      attr-def: longitude of lake centroid
+      attr-defs: >-
+        citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"
+      data-min: -98.00012
+      data-max: -124.8286
+      data-units: decimal-degrees east
+    -
+      attr-label: time
+      attr-def: date of prediction
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: days since 1970-01-01 00:00:00
+  -
+    data-name: 01_weather_N24-53_W98-126.nc
+    data-description: >-
+      A netcdf file containing daily meteorological conditions for 13,661 grid cells that contained lakes
+      between 24°N to 53°N and -98°E to -126°E from 1980-2020. Meteorological conditions are daily averages
+      of hourly estimates. See lake_metadata.csv to match grid locations to the associated lake site_id
+      (some grid cells apply to multiple lakes).
+    attributes:
+   -
+      attr-label: weather_id
+      attr-def: >-
+        Identifier for meteorological data from the NLDAS data grid, where the x (longitude) and y (latitude) specify cell indices
+        for the dataset. Format of this identifier is "nldas_x{x-index}_y{y-index}".
+      attr-defs: >-
+        Mitchell et al., 2004
       data-min: NA
       data-max: NA
       data-units: NA
+    -
+      attr-label: dlwrfsfc
+      attr-def: longwave radiation flux downwards
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: w/m^2
+    -
+      attr-label: dswrfsfc
+      attr-def: shortwave radiation flux downwards
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: w/m^2
+    -
+      attr-label: tmp2m
+      attr-def: 2-m above ground temperature
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: Kelvin
+    -
+      attr-label: ugrd10m
+      attr-def: 10-m above ground zonal wind speed
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: m/s
+    -
+      attr-label: vgrd10m
+      attr-def: 10-m above ground meridional wind speed
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: m/s
+    -
+      attr-label: lat
+      attr-def: latitude of grid cell centroid
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: 25.8125
+      data-max: 50.5625
+      data-units: decimal-degrees north
+    -
+      attr-label: lon
+      attr-def: latitude of grid cell centroid
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: -98.0625
+      data-max: -124.8125
+      data-units: decimal-degrees east
+    -
+      attr-label: time
+      attr-def: date of prediction
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: days since 1970-01-01 00:00:00
   -
-    data-name: example_shapefile.zip
-    data-description: A zip file containing...
+    data-name: lake_metadata.csv
+    data-description: Select metadata for the 185,550 lakes included in this study
     attributes:
     -
-      attr-label: x
-      attr-def: definition of x
+      attr-label: site_id
+      attr-def: >-
+        Lake identification number for this dataset. It is the Prmnn_I from NHD high-res prefixed
+        with source, as "nhdhr_{Prmnn_I}". The ids have a mix of characters and some can include
+        special characters, such as "{" and "}".
       attr-defs: >-
-        citation or URL of x. If citation, should appear in cross-cites. Can use NA or "This release"
+        http://nhd.usgs.gov/
       data-min: NA
       data-max: NA
       data-units: NA
     -
-      attr-label: y
-      attr-def: definition of y
+      attr-label: weather_id
+      attr-def: >-
+        Identifier for meteorological data from the NLDAS data grid, where the x (longitude) and y (latitude) specify cell indices
+        for the dataset. Format of this identifier is "nldas_x{x-index}_y{y-index}".
       attr-defs: >-
-        citation or URL of y. If citation, should appear in cross-cites. Can use NA or "This release"
+        Mitchell et al., 2004
       data-min: NA
       data-max: NA
       data-units: NA
     -
-      attr-label: z
-      attr-def: definition of z
+      attr-label: num_obs
+      attr-def: Number of unique dates with surface water temperature observations for this lake
+      attr-defs: This release
+      data-min: 0
+      data-max: NA
+      data-units: count
+    -
+      attr-label: area_m2
+      attr-def: The approximate surface area of the lake
       attr-defs: >-
-        citation or URL of z. If citation, should appear in cross-cites. Can use NA or "This release"
+        http://nhd.usgs.gov/
+      data-min: NA
+      data-max: NA
+      data-units: meters squared
+    -
+      attr-label: elevation_m
+      attr-def: Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake
+      attr-defs: >-
+        Hollister et al., 2020
+      data-min: NA
+      data-max: NA
+      data-units: meters
+    -
+      attr-label: lake_lon_deg
+      attr-def: longitude of lake centroid
+      attr-defs: >-
+        http://nhd.usgs.gov/
+      data-min: NA
+      data-max: NA
+      data-units: decimal-degrees east
+    -
+      attr-label: lake_lat_deg
+      attr-def: latitude of lake centroid
+      attr-defs: >-
+        http://nhd.usgs.gov/
+      data-min: NA
+      data-max: NA
+      data-units: decimal-degrees north
+    -
+      attr-label: weather_lon_deg
+      attr-def: longitude of NLDAS cell centroid used to as input for EA-LSTM and LM models
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: decimal-degrees east
+    -
+      attr-label: weather_lat_deg
+      attr-def: latitude of NLDAS cell centroid used to as input for EA-LSTM and LM models
+      attr-defs: >-
+        Mitchell et al., 2004
+      data-min: NA
+      data-max: NA
+      data-units: decimal-degrees north
+    -
+      attr-label: RMSE_EALSTM
+      attr-def: >-
+        Root-mean square error (RMSE; in degrees C) of the entity-aware long short term memory (EA-LSTM) surface water temperature predictions.
+        RMSE is estimated from performance using cross-fold validation.
+      attr-defs: >-
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: RMSE_LM
+      attr-def: >-
+        Root-mean square error (RMSE; in degrees C) of the linear model (LM) surface water temperature predictions.
+        RMSE is estimated from performance using cross-fold validation. This LM used the same structure and inputs
+        as Bachmann et al., (2019) but was re-trained and re-evaluated using the lake surface water temperature
+        observations included in this data release. Contrary to other RMSE values reported here, these lake-specific
+        estimates of model performance were calculated with data only from June-September.
+      attr-defs: >-
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Bachmann et al., 2019
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: RMSE_ERA5
+      attr-def: >-
+        Root-mean square error (RMSE; in degrees C) of the surface mixed-layer of the noon UTC-5 grid-representation of lakes
+        in the ERA5 global reanalysis which used the FLake parametrization for lake simulations.
+      attr-defs: >-
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Hersbach et al., 2020
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: cluster_id
+      attr-def: >-
+        NEED JARED TEXT HERE
+      attr-defs: >-
+        Willard et al., 2021
+      data-min: NA
+      data-max: NA
+      data-units: NA
+    -
+      attr-label: fold_id
+      attr-def: >-
+        NEED JARED TEXT HERE
+      attr-defs: >-
+        Willard et al., 2021
+      data-min: NA
+      data-max: NA
+      data-units: NA
+    -
+      attr-label: group_bbox
+      attr-def: >-
+        NEED JARED TEXT HERE
+      attr-defs: >-
+        Willard et al., 2021
+      data-min: NA
+      data-max: NA
+      data-units: NA
+    -
+      attr-label: group_id
+      attr-def: >-
+        NEED JARED TEXT HERE
+      attr-defs: >-
+        Willard et al., 2021
       data-min: NA
       data-max: NA
       data-units: NA
@@ -78,7 +355,7 @@ start-date: 19800101
 end-date: 20201231
 
 update: none planned
-themekeywords: ["machine learning", "deep learning", "hybrid modeling", "water","temperature", "temperate lakes","reservoirs","modeling","climate change","thermal profiles"]
+themekeywords: ["machine learning", "deep learning", "water", "temperature", "temperate lakes", "reservoirs", "modeling", "climate change", "surface temperature"]
 
 usage-rules: >-
   These data are open access usable via creative commons as long as original data providers are acknowledged
