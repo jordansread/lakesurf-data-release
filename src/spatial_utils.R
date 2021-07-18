@@ -52,11 +52,9 @@ generate_group_rects <- function(){
     (unit_cell * scale)+shift
   }
   group_rects <- st_sfc(crs = "+init=epsg:4326",
-                        shift_scale(c(-126,53), c(28,13)),
-                        shift_scale(c(-126,40), c(28,16)),
-                        shift_scale(c(-98, 53), c(16,13)),
-                        shift_scale(c(-98, 40), c(16,16)),
-                        shift_scale(c(-82, 53), c(15,29)))
+                        shift_scale(c(-126,53), c(28,29)),
+                        shift_scale(c(-98, 53), c(31,13)),
+                        shift_scale(c(-98, 40), c(31,16)))
 
   groups <- data.frame(group_id = rep(NA_character_, length(group_rects)), stringsAsFactors = FALSE)
   for (i in 1:length(group_rects)){
