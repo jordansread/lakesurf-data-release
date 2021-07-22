@@ -32,6 +32,7 @@ targets:
   spatial_metadata:
     command: extract_feature(modeled_centroids_sf)
 
+ # had to remove "nhdhr_122196991" which is Grand Lagoon, FL, which is coastal and not a lake
   modeled_centroids_sf:
     command: sf_centroid_metadata('in_data/surface_lake_metadata_file.csv')
 

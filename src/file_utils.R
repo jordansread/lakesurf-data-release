@@ -28,13 +28,14 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
 
   # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
   expver <- 1
-  # add a row column so we know how to reassemble?
+  # add a row column so we know how to reassemble
   obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
                      wtemp_ERA5 = NA_real_)
 
   lake_pts <- centroids_sf %>%
     filter(site_id %in% obs_pred$site_id)
-  # assign netcdf cell indices to each lake in the dataset:
+  # assign netcdf cell indices to each lake in the dataset,
+  # which happens below when we use obs_pred[replace_data$row_num, ] <- replace_data
   era_cell_indices <- feature_cell_indices(cell_grid = era5_grid, lake_pts)
 
   nc <- ncdf4::nc_open(nc_fl)

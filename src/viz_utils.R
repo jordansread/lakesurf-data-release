@@ -18,7 +18,7 @@ plot_time_season_accuracy <- function(fileout, preds_obs_fl){
              doy >= 355 | doy < 79 ~ 'winter')
            ) %>%
     group_by(season, year, site_id) %>%
-    summarize(rmse = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm=TRUE))) %>%
+    summarize(rmse = rmse(wtemp_EALSTM, wtemp_obs)) %>%
     group_by(season, year) %>% summarize(rmse = median(rmse)) %>%
     mutate(col = case_when(
       season == 'spring' ~ filter(sesn_cols, season == 'spring')$col,

@@ -23,11 +23,12 @@ targets:
       "in_text/text_data_release.yml",
       spatial_metadata)
 
+#      "out_xml/data_release_metadata.xml",
   log/00_sb_posted_files.csv:
     command: sb_replace_files(filename = target_name,
       sb_id = I('60341c3ed34eb12031172aa6'),
-      "out_xml/data_release_metadata.xml",
       "out_data/lake_metadata.csv",
+      "out_xml/data_release_metadata.xml",
       "out_data/lake_surface_temp_preds.csv",
       file_hash = 'out_data/netcdf_filehashes.yaml',
       sources = "src/sb_utils.R")

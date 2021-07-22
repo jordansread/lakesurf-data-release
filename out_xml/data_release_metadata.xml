@@ -5,6 +5,8 @@
       <citeinfo>
         <origin>Jared Willard</origin>
         <origin>Jordan S. Read</origin>
+        <origin>Simon N. Topp</origin>
+        <origin>Gretchen J.A. Hansen</origin>
         <origin>Vipin Kumar</origin>
         <pubdate>2021</pubdate>
         <title>Data release: Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.</title>
@@ -18,15 +20,144 @@
           <citeinfo>
             <origin>Jared Willard</origin>
             <origin>Jordan S. Read</origin>
+            <origin>Simon N. Topp</origin>
+            <origin>Gretchen J.A. Hansen</origin>
             <origin>Vipin Kumar</origin>
             <pubdate>2021</pubdate>
             <title>Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.</title>
+            <geoform>publication</geoform>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Frederik Kratzert</origin>
+            <origin>Daniel Klotz</origin>
+            <origin>Guy Shalev</origin>
+            <origin>Günter Klambauer</origin>
+            <origin>Sepp Hochreiter</origin>
+            <origin>Grey Nearing</origin>
+            <pubdate>2019</pubdate>
+            <title>Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets</title>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Kenneth E. Mitchell</origin>
+            <origin>Dag Lohmann</origin>
+            <origin>Paul R. Houser</origin>
+            <origin>Eric F. Wood</origin>
+            <origin>John C. Schaake</origin>
+            <origin>Alan Robock</origin>
+            <origin>Brian A. Cosgrove</origin>
+            <origin>Justin Sheffield</origin>
+            <origin>Qingyun Duan</origin>
+            <origin>Lifeng Luo</origin>
+            <origin>R. Wayne Higgins</origin>
+            <origin>Rachel T. Pinker</origin>
+            <origin>J. Dan Tarpley</origin>
+            <origin>Dennis P. Lettenmaier</origin>
+            <origin>Curtis H. Marshall</origin>
+            <origin>Jared K. Entin</origin>
+            <origin>Ming Pan</origin>
+            <origin>Wei Shi</origin>
+            <origin>Victor Koren</origin>
+            <origin>Jesse Meng</origin>
+            <origin>Bruce H. Ramsay</origin>
+            <origin>Andrew A. Bailey</origin>
+            <pubdate>2004</pubdate>
+            <title>The multi-institution North American Land Data Assimilation System (NLDAS): Utilizing multiple GCIP products and partners in a continental distributed hydrological modeling system</title>
+            <geoform>publication</geoform>
+            <onlink>http://dx.doi.org/10.1029/2003JD003823</onlink>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Jeffrey Hollister</origin>
+            <origin>Tarak Shah</origin>
+            <origin>Alec L. Robitaille</origin>
+            <origin>Marcus W. Beck</origin>
+            <origin>Mike Johnson</origin>
+            <pubdate>2020</pubdate>
+            <title>elevatr: Access Elevation Data from Various APIs</title>
+            <geoform>R package</geoform>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Edzer Pebesma</origin>
+            <pubdate>2018</pubdate>
+            <title>Simple Features for R: Standardized Support for Spatial Vector Data</title>
+            <geoform>The R Journal</geoform>
+            <onlink>https://doi.org/10.32614/RJ-2018-009</onlink>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Roger W. Bachmann</origin>
+            <origin>Sapna Sharma</origin>
+            <origin>Daniel E. Canfield, Jr</origin>
+            <origin>Vincent Lecours</origin>
+            <pubdate>2019</pubdate>
+            <title>The Distribution and Prediction of Summer Near-Surface Water Temperatures in Lakes of the Coterminous United States and Southern Canada</title>
+            <geoform>publication</geoform>
+            <onlink>https://doi.org/10.3390/geosciences9070296</onlink>
+          </citeinfo>
+        </lworkcit>
+        <lworkcit>
+          <citeinfo>
+            <origin>Hans Hersbach</origin>
+            <origin>Bill Bell</origin>
+            <origin>Paul Berrisford</origin>
+            <origin>Shoji Hirahara</origin>
+            <origin>András Horányi</origin>
+            <origin>Joaquín Muñoz-Sabater</origin>
+            <origin>Julien Nicolas</origin>
+            <origin>Carole Peubey</origin>
+            <origin>Raluca Radu</origin>
+            <origin>Dinand Schepers</origin>
+            <origin>Adrian Simmons</origin>
+            <origin>Cornel Soci</origin>
+            <origin>Saleh Abdalla</origin>
+            <origin>Xavier Abellan</origin>
+            <origin>Gianpaolo Balsamo</origin>
+            <origin>Peter Bechtold</origin>
+            <origin>Gionata Biavati</origin>
+            <origin>Jean Bidlot</origin>
+            <origin>Massimo Bonavita</origin>
+            <origin>Giovanna De Chiara</origin>
+            <origin>Per Dahlgren</origin>
+            <origin>Dick Dee</origin>
+            <origin>Michail Diamantakis</origin>
+            <origin>Rossana Dragani</origin>
+            <origin>Johannes Flemming</origin>
+            <origin>Richard Forbes</origin>
+            <origin>Manuel Fuentes</origin>
+            <origin>Alan Geer</origin>
+            <origin>Leo Haimberger</origin>
+            <origin>Sean Healy</origin>
+            <origin>Robin J. Hogan</origin>
+            <origin>Elías Hólm</origin>
+            <origin>Marta Janisková</origin>
+            <origin>Sarah Keeley</origin>
+            <origin>Patrick Laloyaux</origin>
+            <origin>Philippe Lopez</origin>
+            <origin>Cristina Lupu</origin>
+            <origin>Gabor Radnoti</origin>
+            <origin>Patricia de Rosnay</origin>
+            <origin>Iryna Rozum</origin>
+            <origin>Freja Vamborg</origin>
+            <origin>Sebastien Villaume</origin>
+            <origin>Jean-Noël Thépaut</origin>
+            <pubdate>2020</pubdate>
+            <title>The ERA5 global reanalysis</title>
+            <geoform>publication</geoform>
+            <onlink>https://doi.org/10.1002/qj.3803</onlink>
           </citeinfo>
         </lworkcit>
       </citeinfo>
     </citation>
     <descript>
-      <abstract>[a description of this data release]</abstract>
+      <abstract>The data release of daily lake surface temperatures comprises 185,550 lakes across the continental United States from 1980 to 2020 that are generated using an entity-aware long short-term memory deep learning model. In-situ measurements used for model training spanned a subset of 12,253 lakes. Model training was optimized for prediction on unmonitored lakes through a cross validation framework. Median per-lake estimated error found through cross validation on lakes with in-situ surface temperature observations was 1.198 °C.  The generated dataset will be beneficial for a wide range of applications including estimations of thermal habitats and the impacts of climate change on inland lakes.</abstract>
       <purpose>Fisheries biology, limnological research, and climate science.</purpose>
     </descript>
     <timeperd>
@@ -56,21 +187,22 @@
         <themekt>none</themekt>
         <themekey>machine learning</themekey>
         <themekey>deep learning</themekey>
-        <themekey>hybrid modeling</themekey>
         <themekey>water</themekey>
         <themekey>temperature</themekey>
         <themekey>temperate lakes</themekey>
         <themekey>reservoirs</themekey>
         <themekey>modeling</themekey>
         <themekey>climate change</themekey>
-        <themekey>thermal profiles</themekey>
+        <themekey>surface temperature</themekey>
       </theme>
       <theme>
         <themekt>ISO 19115 Topic Category</themekt>
         <themekey>environment</themekey>
         <themekey>inlandWaters</themekey>
-        <themekey>007</themekey>
-        <themekey>012</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Thesaurus</themekt>
+        <themekey>water resources</themekey>
       </theme>
       <place>
         <placekt>Department of Commerce, 1995, Countries, Dependencies, Areas of Special Sovereignty, and Their Principal Administrative Divisions,  Federal Information Processing Standard (FIPS) 10-4, Washington, D.C., National Institute of Standards and Technology</placekt>
@@ -220,7 +352,7 @@
     <lineage>
       <procstep>
         <procdesc>[A description of processing]</procdesc>
-        <procdate>20210630</procdate>
+        <procdate>20210719</procdate>
       </procstep>
     </lineage>
   </dataqual>
@@ -230,7 +362,7 @@
     <ptvctinf>
       <sdtsterm>
         <sdtstype>Point</sdtstype>
-        <ptvctcnt>185550</ptvctcnt>
+        <ptvctcnt>185549</ptvctcnt>
       </sdtsterm>
     </ptvctinf>
   </spdoinfo>
@@ -252,14 +384,14 @@
   <eainfo>
     <detailed>
       <enttyp>
-        <enttypl>example_cars.csv</enttypl>
-        <enttypd>A csv file containing important information...</enttypd>
+        <enttypl>01_predicted_temp_N24-53_W98-126.nc</enttypl>
+        <enttypd>A netcdf file containing daily surface water temperature predictions for 62,560 U.S. lakes located between 24°N to 53°N and -98°E to -126°E from 1980-2020. Predictions were made using the EA-LSTM model as described in Kratzert et al., (2019) and applied to lake prediction in Willard et al., (2021).</enttypd>
         <enttypds>U.S. Geological Survey</enttypds>
       </enttyp>
       <attr>
-        <attrlabl>speed</attrlabl>
-        <attrdef>definition of column_name_1</attrdef>
-        <attrdefs>citation or URL of column_name_1. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrlabl>site_id</attrlabl>
+        <attrdef>Lake identification number for this dataset. Is the Prmnn_I prefixed with source, as "nhdhr_{Prmnn_I}".</attrdef>
+        <attrdefs>http://nhd.usgs.gov/</attrdefs>
         <attrdomv>
           <rdom>
             <rdommin>NA</rdommin>
@@ -269,28 +401,76 @@
         </attrdomv>
       </attr>
       <attr>
-        <attrlabl>dist</attrlabl>
-        <attrdef>definition of column_name_2</attrdef>
-        <attrdefs>citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrlabl>surftemp</attrlabl>
+        <attrdef>Predicted daily lake surface temperature from the entity-aware long short term memory (EA-LSTM) network model</attrdef>
+        <attrdefs>This release; Willard et al., 2021; Kratzert et al., 2019</attrdefs>
         <attrdomv>
           <rdom>
             <rdommin>NA</rdommin>
             <rdommax>NA</rdommax>
-            <attrunit>NA</attrunit>
+            <attrunit>degrees C</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lat</attrlabl>
+        <attrdef>Latitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>http://nhd.usgs.gov/; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>25.77701</rdommin>
+            <rdommax>50.57569</rdommax>
+            <attrunit>decimal-degrees north</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lon</attrlabl>
+        <attrdef>Longitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>http://nhd.usgs.gov/; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-98.00012</rdommin>
+            <rdommax>-124.8286</rdommax>
+            <attrunit>decimal-degrees east</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>alt</attrlabl>
+        <attrdef>Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake.</attrdef>
+        <attrdefs>Hollister et al., 2020</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-85</rdommin>
+            <rdommax>3922</rdommax>
+            <attrunit>meters</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>time</attrlabl>
+        <attrdef>date of prediction</attrdef>
+        <attrdefs>NA</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>days since 1970-01-01 00:00:00</attrunit>
           </rdom>
         </attrdomv>
       </attr>
     </detailed>
     <detailed>
       <enttyp>
-        <enttypl>example_shapefile.zip</enttypl>
-        <enttypd>A zip file containing...</enttypd>
+        <enttypl>01_weather_N24-53_W98-126.nc</enttypl>
+        <enttypd>A netcdf file containing daily meteorological conditions for 13,661 grid cells that contained lakes between 24°N to 53°N and -98°E to -126°E from 1980-2020. Meteorological conditions are daily averages of hourly estimates. See lake_metadata.csv to match grid locations to the associated lake site_id (some grid cells apply to multiple lakes).</enttypd>
         <enttypds>U.S. Geological Survey</enttypds>
       </enttyp>
       <attr>
-        <attrlabl>x</attrlabl>
-        <attrdef>definition of x</attrdef>
-        <attrdefs>citation or URL of x. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrlabl>weather_id</attrlabl>
+        <attrdef>Identifier for meteorological data from the NLDAS data grid, where the x (longitude) and y (latitude) specify cell indices for the dataset. Format of this identifier is "nldas_x{x-index}_y{y-index}".</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
         <attrdomv>
           <rdom>
             <rdommin>NA</rdommin>
@@ -300,9 +480,112 @@
         </attrdomv>
       </attr>
       <attr>
-        <attrlabl>TRUE</attrlabl>
-        <attrdef>definition of y</attrdef>
-        <attrdefs>citation or URL of y. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrlabl>dlwrfsfc</attrlabl>
+        <attrdef>longwave radiation flux downwards</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>w/m^2</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>dswrfsfc</attrlabl>
+        <attrdef>shortwave radiation flux downwards</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>w/m^2</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>tmp2m</attrlabl>
+        <attrdef>2-m above ground temperature</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>Kelvin</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>ugrd10m</attrlabl>
+        <attrdef>10-m above ground zonal wind speed</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>m/s</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>vgrd10m</attrlabl>
+        <attrdef>10-m above ground meridional wind speed</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>m/s</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lat</attrlabl>
+        <attrdef>latitude of grid cell centroid</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>25.8125</rdommin>
+            <rdommax>50.5625</rdommax>
+            <attrunit>decimal-degrees north</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lon</attrlabl>
+        <attrdef>latitude of grid cell centroid</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-98.0625</rdommin>
+            <rdommax>-124.8125</rdommax>
+            <attrunit>decimal-degrees east</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>time</attrlabl>
+        <attrdef>date of prediction</attrdef>
+        <attrdefs>NA</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>days since 1970-01-01 00:00:00</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+    <detailed>
+      <enttyp>
+        <enttypl>lake_metadata.csv</enttypl>
+        <enttypd>Select metadata for the 185,550 lakes included in this study</enttypd>
+        <enttypds>U.S. Geological Survey</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>site_id</attrlabl>
+        <attrdef>Lake identification number for this dataset. It is the Prmnn_I from NHD high-res prefixed with source, as "nhdhr_{Prmnn_I}". The ids have a mix of characters and some can include special characters, such as "{" and "}".</attrdef>
+        <attrdefs>http://nhd.usgs.gov/</attrdefs>
         <attrdomv>
           <rdom>
             <rdommin>NA</rdommin>
@@ -312,9 +595,177 @@
         </attrdomv>
       </attr>
       <attr>
-        <attrlabl>z</attrlabl>
-        <attrdef>definition of z</attrdef>
-        <attrdefs>citation or URL of z. If citation, should appear in cross-cites. Can use NA or "This release"</attrdefs>
+        <attrlabl>weather_id</attrlabl>
+        <attrdef>Identifier for meteorological data from the NLDAS data grid, where the x (longitude) and y (latitude) specify cell indices for the dataset. Format of this identifier is "nldas_x{x-index}_y{y-index}".</attrdef>
+        <attrdefs>Mitchell et al., 2004</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>num_obs</attrlabl>
+        <attrdef>Number of unique dates with surface water temperature observations for this lake</attrdef>
+        <attrdefs>This release</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>count</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>area_m2</attrlabl>
+        <attrdef>The approximate surface area of the lake</attrdef>
+        <attrdefs>http://nhd.usgs.gov/</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>meters squared</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>elevation_m</attrlabl>
+        <attrdef>Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake</attrdef>
+        <attrdefs>Hollister et al., 2020</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>meters</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lake_lon_deg</attrlabl>
+        <attrdef>Longitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>http://nhd.usgs.gov/; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-124.8286</rdommin>
+            <rdommax>-67.00313</rdommax>
+            <attrunit>decimal-degrees east</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>lake_lat_deg</attrlabl>
+        <attrdef>Latitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>http://nhd.usgs.gov/; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>25.02196</rdommin>
+            <rdommax>50.57569</rdommax>
+            <attrunit>decimal-degrees north</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>weather_lon_deg</attrlabl>
+        <attrdef>longitude of NLDAS cell centroid used to as input for EA-LSTM and LM models. Centroid was calculated using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>Mitchell et al., 2004; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>-124.8125</rdommin>
+            <rdommax>-67.0625</rdommax>
+            <attrunit>decimal-degrees east</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>weather_lat_deg</attrlabl>
+        <attrdef>latitude of NLDAS cell centroid used to as input for EA-LSTM and LM models. Centroid was calculated using the st_centroid function in the sf R package.</attrdef>
+        <attrdefs>Mitchell et al., 2004; Pebesma 2018</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>25.0625</rdommin>
+            <rdommax>50.5625</rdommax>
+            <attrunit>decimal-degrees north</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>RMSE_EALSTM</attrlabl>
+        <attrdef>Root-mean square error (RMSE; in degrees C) of the entity-aware long short term memory (EA-LSTM) surface water temperature predictions. RMSE is estimated from performance using cross-fold validation.</attrdef>
+        <attrdefs>https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>degrees C</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>RMSE_LM</attrlabl>
+        <attrdef>Root-mean square error (RMSE; in degrees C) of the linear model (LM) surface water temperature predictions. RMSE is estimated from performance using cross-fold validation. This LM used the same structure and inputs as Bachmann et al., (2019) but was re-trained and re-evaluated using the lake surface water temperature observations included in this data release. Contrary to other RMSE values reported here, these lake-specific estimates of model performance were calculated with data only from June-September.</attrdef>
+        <attrdefs>https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Bachmann et al., 2019</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>degrees C</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>RMSE_ERA5</attrlabl>
+        <attrdef>Root-mean square error (RMSE; in degrees C) of the surface mixed-layer of the noon UTC-5 grid-representation of lakes in the ERA5 global reanalysis which used the FLake parametrization for lake simulations.</attrdef>
+        <attrdefs>https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Hersbach et al., 2020</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>degrees C</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>cluster_id</attrlabl>
+        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdefs>Willard et al., 2021</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>1</rdommin>
+            <rdommax>16</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>fold_id</attrlabl>
+        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdefs>Willard et al., 2021</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>1</rdommin>
+            <rdommax>5</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>group_bbox</attrlabl>
+        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdefs>Willard et al., 2021</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>NA</rdommin>
+            <rdommax>NA</rdommax>
+            <attrunit>NA</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>group_id</attrlabl>
+        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdefs>Willard et al., 2021</attrdefs>
         <attrdomv>
           <rdom>
             <rdommin>NA</rdommin>
@@ -364,7 +815,7 @@
     </stdorder>
   </distinfo>
   <metainfo>
-    <metd>20210630</metd>
+    <metd>20210719</metd>
     <metc>
       <cntinfo>
         <cntperp>
@@ -380,7 +831,7 @@
           <postal>53562</postal>
           <country>U.S.A.</country>
         </cntaddr>
-        <cntvoice>608-821-3921</cntvoice>
+        <cntvoice>608-821-3922</cntvoice>
         <cntfax>608-821-3817</cntfax>
         <cntemail>jread@usgs.gov</cntemail>
       </cntinfo>

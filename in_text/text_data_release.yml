@@ -3,7 +3,12 @@ title: >-
 
 
 abstract: >-
-  [a description of this data release]
+  The data release of daily lake surface temperatures comprises 185,550 lakes across the continental United States from
+  1980 to 2020 that are generated using an entity-aware long short-term memory deep learning model. In-situ measurements
+  used for model training spanned a subset of 12,253 lakes. Model training was optimized for prediction on unmonitored
+  lakes through a cross validation framework. Median per-lake estimated error found through cross validation on lakes with
+  in-situ surface temperature observations was 1.198 °C.  The generated dataset will be beneficial for a wide range of
+  applications including estimations of thermal habitats and the impacts of climate change on inland lakes.
 
 authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen","Vipin Kumar"]
 pubdate: 2021 # replace with actual year, e.g., 2020
@@ -38,7 +43,15 @@ larger-cites:
       elevatr: Access Elevation Data from Various APIs
     pubdate: 2020
     form: R package
-    doi: doi:10.5281/zenodo.4282962
+    doi: 10.5281/zenodo.4282962
+  -
+    authors: ["Edzer Pebesma"]
+    title: >-
+      Simple Features for R: Standardized Support for Spatial Vector Data
+    pubdate: 2018
+    form: The R Journal
+    doi: 10.32614/RJ-2018-009
+    link: https://doi.org/10.32614/RJ-2018-009
   -
     authors: ["Roger W. Bachmann", "Sapna Sharma", "Daniel E. Canfield, Jr", "Vincent Lecours"]
     title: >-
@@ -68,12 +81,12 @@ entities:
     data-description: >-
       A netcdf file containing daily surface water temperature predictions for 62,560 U.S. lakes located
       between 24°N to 53°N and -98°E to -126°E from 1980-2020. Predictions were made using the EA-LSTM model
-      as described in Kratzert et al., 2019 and applied to lake prediction in Willard et al., 2021
+      as described in Kratzert et al., (2019) and applied to lake prediction in Willard et al., (2021).
     attributes:
     -
       attr-label: site_id
       attr-def: >-
-        Lake identification number for this dataset. Is the Prmnn_I prefixed with source, as "nhdhr_{Prmnn_I}"
+        Lake identification number for this dataset. Is the Prmnn_I prefixed with source, as "nhdhr_{Prmnn_I}".
       attr-defs: >-
         http://nhd.usgs.gov/
       data-min: NA
@@ -88,29 +101,34 @@ entities:
       data-max: NA
       data-units: degrees C
     -
-      attr-label: alt
-      attr-def: Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake
-      attr-defs: >-
-        Hollister et al., 2020
-      data-min: -85
-      data-max: 3922
-      data-units: meters
-    -
       attr-label: lat
-      attr-def: latitude of lake centroid
+      attr-def: >-
+        Latitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid
+        function in the sf R package.
       attr-defs: >-
-        citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"
+        http://nhd.usgs.gov/; Pebesma 2018
       data-min: 25.77701
       data-max: 50.57569
       data-units: decimal-degrees north
     -
       attr-label: lon
-      attr-def: longitude of lake centroid
+      attr-def: >-
+        Longitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid
+        function in the sf R package.
       attr-defs: >-
-        citation or URL of column_name_2. If citation, should appear in cross-cites. Can use NA or "This release"
+        http://nhd.usgs.gov/; Pebesma 2018
       data-min: -98.00012
       data-max: -124.8286
       data-units: decimal-degrees east
+    -
+      attr-label: alt
+      attr-def: >-
+        Approximate elevation of lake surface above sea level as estimated by the elevatr R package using the centroid of the lake.
+      attr-defs: >-
+        Hollister et al., 2020
+      data-min: -85
+      data-max: 3922
+      data-units: meters
     -
       attr-label: time
       attr-def: date of prediction
@@ -126,7 +144,7 @@ entities:
       of hourly estimates. See lake_metadata.csv to match grid locations to the associated lake site_id
       (some grid cells apply to multiple lakes).
     attributes:
-   -
+    -
       attr-label: weather_id
       attr-def: >-
         Identifier for meteorological data from the NLDAS data grid, where the x (longitude) and y (latitude) specify cell indices
@@ -249,35 +267,43 @@ entities:
       data-units: meters
     -
       attr-label: lake_lon_deg
-      attr-def: longitude of lake centroid
+      attr-def: >-
+        Longitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid
+        function in the sf R package.
       attr-defs: >-
-        http://nhd.usgs.gov/
-      data-min: NA
-      data-max: NA
+        http://nhd.usgs.gov/; Pebesma 2018
+      data-min: -124.8286
+      data-max: -67.00313
       data-units: decimal-degrees east
     -
       attr-label: lake_lat_deg
-      attr-def: latitude of lake centroid
+      attr-def: >-
+        Latitude of lake centroid, calculated from the national hydrography dataset polygons using the st_centroid
+        function in the sf R package.
       attr-defs: >-
-        http://nhd.usgs.gov/
-      data-min: NA
-      data-max: NA
+        http://nhd.usgs.gov/; Pebesma 2018
+      data-min: 25.02196
+      data-max: 50.57569
       data-units: decimal-degrees north
     -
       attr-label: weather_lon_deg
-      attr-def: longitude of NLDAS cell centroid used to as input for EA-LSTM and LM models
+      attr-def: >-
+        longitude of NLDAS cell centroid used to as input for EA-LSTM and LM models. Centroid was calculated
+        using the st_centroid function in the sf R package.
       attr-defs: >-
-        Mitchell et al., 2004
-      data-min: NA
-      data-max: NA
+        Mitchell et al., 2004; Pebesma 2018
+      data-min: -124.8125
+      data-max: -67.0625
       data-units: decimal-degrees east
     -
       attr-label: weather_lat_deg
-      attr-def: latitude of NLDAS cell centroid used to as input for EA-LSTM and LM models
+      attr-def: >-
+        latitude of NLDAS cell centroid used to as input for EA-LSTM and LM models. Centroid was calculated
+        using the st_centroid function in the sf R package.
       attr-defs: >-
-        Mitchell et al., 2004
-      data-min: NA
-      data-max: NA
+        Mitchell et al., 2004; Pebesma 2018
+      data-min: 25.0625
+      data-max: 50.5625
       data-units: decimal-degrees north
     -
       attr-label: RMSE_EALSTM
@@ -318,8 +344,8 @@ entities:
         NEED JARED TEXT HERE
       attr-defs: >-
         Willard et al., 2021
-      data-min: NA
-      data-max: NA
+      data-min: 1
+      data-max: 16
       data-units: NA
     -
       attr-label: fold_id
@@ -327,8 +353,8 @@ entities:
         NEED JARED TEXT HERE
       attr-defs: >-
         Willard et al., 2021
-      data-min: NA
-      data-max: NA
+      data-min: 1
+      data-max: 5
       data-units: NA
     -
       attr-label: group_bbox
@@ -378,7 +404,7 @@ contact-zip: 53562
 
 metadata-person: Jordan S. Read
 metadata-position: Research Civil Engineer
-metadata-phone: 608-821-3921
+metadata-phone: 608-821-3922
 metadata-fax: 608-821-3817
 metadata-email: jread@usgs.gov
 metadata-address: "8505 Research Way"

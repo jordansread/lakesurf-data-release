@@ -15,11 +15,6 @@ targets:
     depends:
       - out_data/netcdf_filehashes.yaml
 
-  # to do:
-  # - update this so cell_index is a continuous variable that runs throughout all groups and is included in the metadata
-  # - truncate time to export time range (1980-2020)
-  # - clean up metadata with Blodgett advice
-  # - create a joined table with variable information (e.g., units and long_name)
 
   out_data/netcdf_filehashes.yaml:
     command: combine_hash_files(target_name,
