@@ -16,7 +16,6 @@ packages:
 sources:
   - src/spatial_utils.R
   - src/file_utils.R
-  - src/group_utils.R
 
 targets:
   1_spatial:
