@@ -175,7 +175,7 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
     st_transform(plot_proj)
 
 
-  bin_breaks <- c(1, 2, 5, 10, 50, 100, 1000000)
+  bin_breaks <- c(1, 2, 5, 10, 20, 50, 100, 1000000)
   n_cols <- length(bin_breaks) - 1
 
   col_tbl <- tibble(val = bin_breaks,
@@ -205,12 +205,44 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
   png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
   par(omi = c(0,0,0.00,0.00), mai = c(0,0,0,0))
 
-  plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, reset = FALSE, lwd = 0.5)
+  plot(st_geometry(styled_grid), setParUsrBB = TRUE, col = styled_grid$col, border = styled_grid$col, reset = FALSE, lwd = 0.5)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
+  plot_dims <- par('usr')
+
+  bin_w_prc <- 0.044
+  bin_h_prc <- 0.045
+  bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
+  bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
+  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.05
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.07
+  for (i in 1:n_cols){
+    # create a square for each color
+    this_x0 <- x0+bin_w*(i-1)
+    rect(xleft = this_x0, xright = this_x0+bin_w,
+         ybottom = y0, ytop = y0+bin_h,
+            col = viridis::mako(n = n_cols, direction = -1L)[i],
+            border = NA)
+
+    # don't plot the last number because all others above the second to last are the same color:
+    if (i == 1){
+      text(x = this_x0 + bin_w/2, y = y0+bin_h, bin_breaks[i], pos = 3, offset = 0.25, cex = 1)
+    } else if (i == n_cols){
+      text(x = this_x0 + bin_w/2, y = y0+bin_h, paste0(bin_breaks[i],'+'), pos = 3, offset = 0.25, cex = 1)
+    } else {
+      text_str <- sprintf('%s-%s', bin_breaks[i], bin_breaks[i+1]-1)
+      text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.3, cex = 0.9)
+    }
+
+  }
+
+
   dev.off()
 
 }
 
+add_legend <- function(plot_dims, bin_breaks, n_cols, col_fun){
+
+}
 #' create an accuracy grid for a 1:1 scatter plot
 #' use heat/intensity to indicate how many values are in that cell
 plot_accuracy <- function(fileout, preds_obs_fl, cellsize, model_id){
