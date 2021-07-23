@@ -110,7 +110,7 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, 
     mutate(cell_id = row_number()) %>%
     st_transform(plot_proj)
 
-  bin_breaks <- c(0, seq(0.75, 4.5, by = 0.25), 20)
+  bin_breaks <- c(0, seq(0.75, 5.75, by = 0.05), 20)
   n_cols <- length(bin_breaks) - 1
 
   col_tbl <- tibble(val = bin_breaks,
@@ -132,17 +132,6 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, 
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
     left_join(col_tbl, by = 'bin')
 
-  # cell_obs %>% arrange(desc(rmse)) # to find the worst offenders
-  #
-  # get all the predictions so you can filter by cell_id
-  # pred_sites <- st_transform(sites_sf, plot_proj) %>%
-  #   st_intersection(site_grid, .) %>%
-  #   st_drop_geometry() %>% select(cell_id, site_id) %>%
-  #   right_join(pred_obs, by = 'site_id')
-  #
-  # filter by cell_id
-  # pred_sites %>% filter(cell_id == 877) %>% group_by(source) %>% summarize(rmse = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm=TRUE)))
-
   usa_sf <- sf::st_transform(spData::us_states, crs = 4326) %>%
     st_as_sf() %>%
     st_transform(plot_proj) %>% st_geometry()
@@ -150,10 +139,12 @@ plot_spatial_accuracy <- function(fileout, metadata_fl, preds_obs_fl, cellsize, 
   styled_grid <- site_grid %>% left_join(cell_obs, by = 'cell_id')
 
   png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.00,0.00), mai = c(0,0,0,0))
-
-  plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, reset = FALSE, lwd = 0.5)
+  par(omi = c(0,0,0.00,0.00), mai = c(0.1,0.1,0.1,0.1), xpd = NA)
+  plot(usa_sf, col = NA, border = NA, reset = FALSE, setParUsrBB = TRUE)
+  plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
+  plot_dims <- par('usr')
+  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L, title = 'Validation error (RMSE °C)')
   dev.off()
 }
 
@@ -203,44 +194,52 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
   styled_grid <- site_grid %>% left_join(cell_obs, by = 'cell_id')
 
   png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.00,0.00), mai = c(0,0,0,0))
+  par(omi = c(0,0,0.00,0.00), mai = c(0.1,0.1,0.1,0.1), xpd = NA)
 
-  plot(st_geometry(styled_grid), setParUsrBB = TRUE, col = styled_grid$col, border = styled_grid$col, reset = FALSE, lwd = 0.5)
+  plot(usa_sf, col = NA, border = NA, reset = FALSE, setParUsrBB = TRUE)
+  plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
   plot_dims <- par('usr')
-
-  bin_w_prc <- 0.044
-  bin_h_prc <- 0.045
-  bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
-  bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
-  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.05
-  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.07
-  for (i in 1:n_cols){
-    # create a square for each color
-    this_x0 <- x0+bin_w*(i-1)
-    rect(xleft = this_x0, xright = this_x0+bin_w,
-         ybottom = y0, ytop = y0+bin_h,
-            col = viridis::mako(n = n_cols, direction = -1L)[i],
-            border = NA)
-
-    # don't plot the last number because all others above the second to last are the same color:
-    if (i == 1){
-      text(x = this_x0 + bin_w/2, y = y0+bin_h, bin_breaks[i], pos = 3, offset = 0.25, cex = 1)
-    } else if (i == n_cols){
-      text(x = this_x0 + bin_w/2, y = y0+bin_h, paste0(bin_breaks[i],'+'), pos = 3, offset = 0.25, cex = 1)
-    } else {
-      text_str <- sprintf('%s-%s', bin_breaks[i], bin_breaks[i+1]-1)
-      text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.3, cex = 0.9)
-    }
-
-  }
-
+  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::mako, col_fun_dir = -1L, title = 'Number of observed lakes (#)')
 
   dev.off()
 
 }
 
-add_legend <- function(plot_dims, bin_breaks, n_cols, col_fun){
+
+add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title){
+  total_leg_prc <- 0.3
+  bin_w_prc <- total_leg_prc / n_cols
+  bin_h_prc <- 0.045
+  bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
+  total_leg_w <- (plot_dims[2] - plot_dims[1]) * total_leg_prc
+  bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
+  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.01
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.013
+  for (i in 1:n_cols){
+    # create a square for each color
+    this_x0 <- x0+bin_w*(i-1)
+    rect(xleft = this_x0, xright = this_x0+bin_w,
+         ybottom = y0, ytop = y0+bin_h,
+         col = col_fun(n = n_cols, direction = col_fun_dir)[i],
+         border = NA)
+    if (all(bin_breaks %% 1 == 0)){
+      # don't plot the last number because all others above the second to last are the same color:
+      if (i == 1){
+        text(x = this_x0 + bin_w/2, y = y0+bin_h, bin_breaks[i], pos = 3, offset = 0.25, cex = 1)
+      } else if (i == n_cols){
+        text(x = this_x0 + bin_w/2, y = y0+bin_h, paste0(bin_breaks[i],'+'), pos = 3, offset = 0.25, cex = 1)
+      } else {
+        text_str <- sprintf('%s-%s', bin_breaks[i], bin_breaks[i+1]-1)
+        text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.3, cex = 0.9)
+      }
+    } else {
+      if ((bin_breaks[i] * 2) %% 1 == 0 && bin_breaks[i] != 0){
+        text(x = this_x0, y = y0+bin_h, bin_breaks[i], pos = 3, offset = 0.25, cex = 1)
+      }
+    }
+  }
+  text(x = x0, y = y0+bin_h *2.3, title, pos = 4, offset = 0, cex = 1.5)
 
 }
 #' create an accuracy grid for a 1:1 scatter plot
@@ -253,13 +252,16 @@ plot_accuracy <- function(fileout, preds_obs_fl, cellsize, model_id){
     select(geometry=x) %>%
     mutate(cell_id = row_number())
 
-  bin_breaks <- c(1, seq(10, 2000, by = 10), 10000000000)
+  bin_breaks <- c(1:9 %o% 10^(0:2), 1:3 %o% 10^(3), 200000000)
   n_cols <- length(bin_breaks) - 1
 
+  col_fun <- viridis::mako
+  col_fun_dir <- -1L
+
   col_tbl <- tibble(val = bin_breaks,
-                    col = c(viridis::mako(n = n_cols, direction = -1L),
+                    col = c(col_fun(n = n_cols, direction = col_fun_dir),
                             # we want all values above a certain threshold to be the same color
-                            rep(tail(viridis::mako(n = n_cols, direction = -1L), 1L),
+                            rep(tail(col_fun(n = n_cols, direction = col_fun_dir), 1L),
                                 times = length(bin_breaks) - n_cols)),
                     bin = cut(val, breaks = bin_breaks, right = F)) %>%
     filter(!is.na(bin)) %>%
@@ -288,6 +290,30 @@ plot_accuracy <- function(fileout, preds_obs_fl, cellsize, model_id){
   axis(1, at = seq(0, 40, by = 5), tck = -0.01)
   axis(2, at = seq(0, 40, by = 5), las = 1, tck = -0.01)
   abline(0,1, lty = 'dashed')
+  plot_dims <- par('usr')
+  y_leg_prc <- 0.02 # bottom edge of colors
+  x_leg_prc <- 0.92 # right edge of colors
+
+  bin_w_prc <- 0.03
+  bin_h_prc <- 0.01
+  bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
+  bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
+  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * x_leg_prc - (plot_dims[2] - plot_dims[1]) * bin_w_prc
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * y_leg_prc + (plot_dims[4] - plot_dims[3])* bin_h_prc * n_cols
+  for (i in 1:n_cols){
+
+    this_y0 <- y0-bin_h*(i-1)
+    rect(xleft = x0, xright = x0+bin_w,
+         ybottom = this_y0, ytop = this_y0-bin_h,
+         col = col_fun(n = n_cols, direction = col_fun_dir)[i],
+         border = NA)
+    if (bin_breaks[i] %in% c(1,10,100,1000)){
+      text(x = x0+bin_w, y = this_y0-bin_h/2, bin_breaks[i], pos = 4, offset = 0.25, cex = 1)
+    }
+
+  }
+
+  text(x0+bin_w/2, y0, 'Count', pos = 3, cex = 1.5, offset = 0.75)
   dev.off()
 
 }
