@@ -5,6 +5,14 @@ get_cols <- function(){
     season = c('spring','summer','winter','fall'))
 }
 
+get_proj <- function(){
+  "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
+}
+
+get_model_type <- function(model_id){
+  c(wtemp_EALSTM = 'EA-LSTM', wtemp_ERA5 = 'ERA5', wtemp_LM = 'Bachmann LM')[[model_id]]
+}
+
 plot_time_season_accuracy <- function(fileout, preds_obs_fl){
 
   sesn_cols <- get_cols()
@@ -93,10 +101,10 @@ plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
   dev.off()
 }
 
-plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id){
+plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id, panel_text){
 
   min_obs <- 100 # minimum number of observations per cell to plot a color
-  plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
+  plot_proj <- get_proj()
 
   pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
 
@@ -142,15 +150,18 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id)
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
   plot_dims <- par('usr')
-  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L, title = 'Validation error (RMSE °C)')
+  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
+  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
+  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L,
+                 title = c(sprintf('%s-predicted', get_model_type(model_id)), 'validation error (RMSE °C)'))
   par(old_par)
 }
 
 #' plot number of observed lakes within each cell
 plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
 
-  plot_proj <- "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
-
+  plot_proj <- get_proj()
   pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
 
   sites_sf <- read.csv(metadata_fl) %>%
@@ -164,6 +175,7 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
     st_transform(plot_proj)
 
 
+  # color bin breaks
   bin_breaks <- c(1, 2, 5, 10, 20, 50, 100, 1000000)
   n_cols <- length(bin_breaks) - 1
 
@@ -213,7 +225,7 @@ add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, 
   total_leg_w <- (plot_dims[2] - plot_dims[1]) * total_leg_prc
   bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
   x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.01
-  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.013
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.025
   for (i in 1:n_cols){
     # create a square for each color
     this_x0 <- x0+bin_w*(i-1)
@@ -237,14 +249,19 @@ add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, 
       }
     }
   }
-  text(x = x0, y = y0+bin_h *2.3, title, pos = 4, offset = 0, cex = 1.2)
+  text(x = x0, y = y0+bin_h *2.3, tail(title, 1L), pos = 4, offset = 0, cex = 1.2)
+  if (length(title) == 2){
+    text(x = x0, y = y0+bin_h * 3.3, title[1L], pos = 4, offset = 0, cex = 1.2)
+  }
+
 
 }
+
+
 #' create an accuracy grid for a 1:1 scatter plot
 #' use heat/intensity to indicate how many values are in that cell
-plot_accuracy <- function(preds_obs_fl, cellsize, model_id){
+plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
-  model_type <- c(wtemp_EALSTM = 'EA-LSTM', wtemp_ERA5 = 'ERA5', wtemp_LM = 'Bachmann LM')
   acc_grid <- st_sfc(st_polygon(list(rbind(c(0,0), c(40,0), c(40,40), c(0,0))))) %>%
     st_make_grid(cellsize = cellsize) %>%
     st_as_sf() %>%
@@ -281,7 +298,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id){
   styled_grid <- acc_grid %>% left_join(acc_vals, by = 'cell_id')
   old_par <- par(mai = c(.34,0.34,0,0), las = 1, mgp = c(1.4,.4,0), xaxs = 'i', yaxs = 'i')
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, reset = FALSE,
-       ylab = sprintf("%s-predicted surface temperature (°C)", model_type[[model_id]]),
+       ylab = sprintf("%s-predicted surface temperature (°C)", get_model_type(model_id)),
        xlab = "Observed surface temperature (°C)", axes = FALSE,
        ylim = c(0, 38), xlim = c(0, 38))
   box()
@@ -289,6 +306,9 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id){
   axis(2, at = seq(0, 40, by = 5), las = 1, tck = -0.01)
   abline(0,1, lty = 'dashed')
   plot_dims <- par('usr')
+  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.039
+  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
   y_leg_prc <- 0.02 # bottom edge of colors
   x_leg_prc <- 0.88 # right edge of colors
 
@@ -321,15 +341,21 @@ plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
                                  model_ids){
   png(file = fileout, width = 7.55, height = 9.1, units = 'in', res = 250)
   par(omi = c(0,0.05,0.05,0.05), mai = c(0,0,0,0), las = 1, xaxs = 'i', yaxs = 'i')
+  panel_chars <- paste0(letters, ')')
   layout(matrix(c(1,1,1, 2,2,3,3,3,4,4,5,5,5,6,6), nrow = 3, byrow = TRUE))
 
   for (j in 1:3){
+
     plot_spatial_accuracy(metadata_fl, preds_obs_fl,
                           cellsize = space_cellsize,
-                          model_id = model_ids[j])
+                          model_id = model_ids[j],
+                          panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
     plot_accuracy(preds_obs_fl,
                   cellsize = accuracy_cellsize,
-                  model_id = model_ids[j])
+                  model_id = model_ids[j],
+                  panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
   }
 
   dev.off()
