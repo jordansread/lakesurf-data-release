@@ -50,11 +50,13 @@ plot_time_season_accuracy <- function(fileout, preds_obs_fl){
       lines(x$year, x$rmse, col = x$col[1], lwd = 2)
       })
   }
+
+
   dev.off()
 }
 
 
-plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
+plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
 
   sesn_cols <- get_cols()
   plot_data <- read_csv(preds_obs_fl) %>%
@@ -74,31 +76,46 @@ plot_data_coverage <- function(fileout, centroids_sf, preds_obs_fl){
       season == 'winter' ~ filter(sesn_cols, season == 'winter')$col
     ))
 
-  png(file = fileout, width = 10, height = 4, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+  old_par <- par(mai = c(0.24, 0.44, 0, 0.1), las = 1, mgp = c(2, 0.4, 0))
 
   plot(NA, NA, xlim = c(1980, 2020), ylim = c(0, 17000),
        ylab = "Suface temperature observations (#)", xlab = "", axes = FALSE)
 
   axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
-  axis(2, at = seq(-5000 ,20000, by = 5000), labels = paste(seq(-5, 20, by = 5), 'k', sep = ''), las = 1, tck = -0.01)
+  axis(2, at = seq(-5000, 20000, by = 5000), labels = paste(seq(-5, 20, by = 5), 'k', sep = ''), las = 1, tck = -0.01)
+  seasons <- c('winter','spring','summer','fall')
 
   for (year in 1980:2020){
-    winter_ht <- filter(plot_data, year == !!year, season == 'winter') %>% pull(n)
-    spring_ht <- filter(plot_data, year == !!year, season == 'spring') %>% pull(n)
-    summer_ht <- filter(plot_data, year == !!year, season == 'summer') %>% pull(n)
-    fall_ht <- filter(plot_data, year == !!year, season == 'fall') %>% pull(n)
-
-    rect(year-0.5, ybottom = 0, xright = year+0.5, ytop = winter_ht,
-         col = filter(sesn_cols, season == 'winter')$col, border = NA)
-    rect(year-0.5, ybottom = winter_ht, xright = year+0.5, ytop = winter_ht + spring_ht,
-         col = filter(sesn_cols, season == 'spring')$col, border = NA)
-    rect(year-0.5, ybottom = winter_ht + spring_ht, xright = year+0.5, ytop = winter_ht + spring_ht + summer_ht,
-         col = filter(sesn_cols, season == 'summer')$col, border = NA)
-    rect(year-0.5, ybottom = winter_ht + spring_ht + summer_ht, xright = year+0.5, ytop = winter_ht + spring_ht + summer_ht + fall_ht,
-         col = filter(sesn_cols, season == 'fall')$col, border = NA)
+    y0 <- 0
+    for (season in seasons){
+      this_ht <- filter(plot_data, year == !!year, season == !! season) %>% pull(n)
+      rect(year-0.5, ybottom = y0, xright = year+0.5, ytop = this_ht + y0,
+           col = filter(sesn_cols, season == !! season)$col, border = NA)
+      y0 <- y0 + this_ht
+    }
   }
-  dev.off()
+
+  plot_dims <- par('usr')
+  bin_w_prc <- 0.032
+  bin_h_prc <- 0.06
+  bin_gap_prc <- 0.015
+  bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
+  bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
+  bin_gap <- (plot_dims[4] - plot_dims[3]) * 0.005
+
+  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.05
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.3
+
+  for (j in 1:length(seasons)){
+    this_y0 <- y0 + (j-1) * (bin_h + bin_gap)
+    rect(xleft = x0, xright = x0 + bin_w, ybottom = this_y0, ytop = this_y0 + bin_h,
+         col = filter(sesn_cols, season == seasons[j])$col, border = NA)
+    text(x = x0 + bin_w, y = this_y0 + bin_h * 0.4 , stringr::str_to_title(seasons[j]), pos = 4, offset = 0.5)
+  }
+  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.03
+  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
+  par(old_par)
 }
 
 plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id, panel_text){
@@ -159,7 +176,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
 }
 
 #' plot number of observed lakes within each cell
-plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
+plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_text){
 
   plot_proj <- get_proj()
   pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
@@ -203,22 +220,25 @@ plot_spatial_coverage <- function(fileout, metadata_fl, preds_obs_fl, cellsize){
 
   styled_grid <- site_grid %>% left_join(cell_obs, by = 'cell_id')
 
-  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.00,0.00), mai = c(0.1,0.1,0.1,0.1), xpd = NA)
+  old_par <- par(mai = c(0.03,0.03,0.03,0.03), xpd = NA)
 
   plot(usa_sf, col = NA, border = NA, reset = FALSE, setParUsrBB = TRUE)
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
   plot_dims <- par('usr')
-  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::mako, col_fun_dir = -1L, title = 'Number of observed lakes (#)')
+  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
+  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
+  add_map_legend(plot_dims, bin_breaks, n_cols,
+                 col_fun = viridis::mako, col_fun_dir = -1L,
+                 title = 'Number of observed lakes (#)',
+                 total_leg_prc = 0.42)
 
-  dev.off()
-
+  par(old_par)
 }
 
 
-add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title){
-  total_leg_prc <- 0.3
+add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title, total_leg_prc = 0.3){
   bin_w_prc <- total_leg_prc / n_cols
   bin_h_prc <- 0.045
   bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
@@ -241,7 +261,7 @@ add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, 
         text(x = this_x0 + bin_w/2, y = y0+bin_h, paste0(bin_breaks[i],'+'), pos = 3, offset = 0.25, cex = 1)
       } else {
         text_str <- sprintf('%s-%s', bin_breaks[i], bin_breaks[i+1]-1)
-        text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.3, cex = 0.9)
+        text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.25, cex = 0.85)
       }
     } else {
       if (bin_breaks[i] %% 1 == 0 && bin_breaks[i] != 0){
@@ -333,6 +353,21 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
   text(x0+bin_w/2, y0, 'Count', pos = 3, cex = 1.2, offset = 0.75)
   par(old_par)
+}
+
+plot_coverage_panel <- function(fileout, centroids_sf, metadata_fl, preds_obs_fl, cellsize){
+
+  png(file = fileout, width = 4.55, height = 5.5, units = 'in', res = 250)
+  par(omi = c(0,0.05,0.05,0.05), mai = c(0,0,0,0), las = 1, xaxs = 'i', yaxs = 'i')
+  panel_chars <- paste0(letters, ')')
+  layout(matrix(c(1,1,1, 2,2), ncol = 1, byrow = TRUE))
+
+  plot_spatial_coverage(metadata_fl = metadata_fl, preds_obs_fl = preds_obs_fl, cellsize = cellsize, panel_text = panel_chars[1L])
+  panel_chars <- panel_chars[-1L]
+  plot_data_coverage(centroids_sf = centroids_sf, preds_obs_fl = preds_obs_fl, panel_text = panel_chars[1L])
+
+
+  dev.off()
 }
 
 plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,

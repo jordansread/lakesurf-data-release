@@ -14,9 +14,8 @@ targets:
   4_viz:
     depends:
       - out_viz/time_season_accuracy.png
-      - out_viz/data_coverage.png
-      - out_viz/spatial_coverage.png
       - out_viz/accuracy_panel.png
+      - out_viz/data_coverage_panel.png
 
   out_viz/time_season_accuracy.png:
     command: plot_time_season_accuracy(target_name, 'out_data/lake_surface_temp_preds.csv')
@@ -28,11 +27,9 @@ targets:
       space_cellsize = 1,
       model_ids = I(c(I('wtemp_EALSTM'), I('wtemp_ERA5'), I('wtemp_LM'))))
 
-  out_viz/data_coverage.png:
-    command: plot_data_coverage(target_name, modeled_centroids_sf, 'out_data/lake_surface_temp_preds.csv')
-
-  out_viz/spatial_coverage.png:
-    command: plot_spatial_coverage(target_name, 'out_data/lake_metadata.csv',
-      'out_data/lake_surface_temp_preds.csv',
+  out_viz/data_coverage_panel.png:
+    command: plot_coverage_panel(target_name,
+      centroids_sf = modeled_centroids_sf,
+      metadata_fl = 'out_data/lake_metadata.csv',
+      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
       cellsize = 1)
-
