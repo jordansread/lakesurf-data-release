@@ -1,6 +1,6 @@
 filepath,sb_id,time_uploaded_to_sb
-out_data/lake_metadata.csv,60341c3ed34eb12031172aa6,2021-07-19 16:49 UTC
-out_data/lake_surface_temp_preds.csv,60341c3ed34eb12031172aa6,2021-07-16 12:37 UTC
+out_data/lake_metadata.csv,60341c3ed34eb12031172aa6,2021-07-28 14:20 UTC
+out_data/lake_surface_temp_preds.csv,60341c3ed34eb12031172aa6,2021-07-28 14:21 UTC
 out_xml/data_release_metadata.xml,60341c3ed34eb12031172aa6,2021-07-19 20:31 UTC
 tmp/01_predicted_temp_N24-53_W98-126.nc,60341c3ed34eb12031172aa6,2021-07-22 15:35 UTC
 tmp/01_weather_N24-53_W98-126.nc,60341c3ed34eb12031172aa6,2021-07-22 15:41 UTC

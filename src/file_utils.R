@@ -11,15 +11,13 @@ sf_centroid_metadata <- function(filein){
            crs = 4326)
 }
 
-convert_preds_tibble <- function(filein, lm_fl){
-  # the lm_fl is just the summer bachmann model, so has a subset of the dates
-  bachmann_summer <- read_csv(lm_fl, col_types = "--Dc-d-") %>%
-    select(site_id, Date, wtemp_LM = `wtemp_predicted-linear_model`)
+convert_preds_tibble <- function(filein){
 
-  read_csv(filein, col_types = "--Dcd-d") %>%
-    select(site_id, Date, wtemp_EALSTM = `wtemp_predicted-ealstm`, wtemp_obs = wtemp_actual) %>%
-    left_join(bachmann_summer) %>%
-    relocate(wtemp_obs, .after = last_col())
+  read_csv(filein, col_types = "--Dcddd") %>%
+    select(site_id, Date,
+           wtemp_EALSTM = `wtemp_predicted-ealstm`,
+           wtemp_LM = `wtemp_predicted-linear_model`,
+           wtemp_obs = wtemp_actual)
 }
 
 match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
