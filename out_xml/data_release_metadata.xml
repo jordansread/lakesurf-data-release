@@ -352,7 +352,7 @@
     <lineage>
       <procstep>
         <procdesc>[A description of processing]</procdesc>
-        <procdate>20210719</procdate>
+        <procdate>20210815</procdate>
       </procstep>
     </lineage>
   </dataqual>
@@ -728,7 +728,7 @@
       </attr>
       <attr>
         <attrlabl>cluster_id</attrlabl>
-        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdef>Numeric identifier for which of the 16 k-means clusters of lakes based on latitude, longitude, and surface area.</attrdef>
         <attrdefs>Willard et al., 2021</attrdefs>
         <attrdomv>
           <rdom>
@@ -740,7 +740,7 @@
       </attr>
       <attr>
         <attrlabl>fold_id</attrlabl>
-        <attrdef>NEED JARED TEXT HERE</attrdef>
+        <attrdef>Numeric identifier for which of the 5 equal groups of lakes used for nested cross validation. Each cluster (cluster_id) of lakes is equally divided among the 5 fold_ids.</attrdef>
         <attrdefs>Willard et al., 2021</attrdefs>
         <attrdomv>
           <rdom>
@@ -815,7 +815,7 @@
     </stdorder>
   </distinfo>
   <metainfo>
-    <metd>20210719</metd>
+    <metd>20210815</metd>
     <metc>
       <cntinfo>
         <cntperp>

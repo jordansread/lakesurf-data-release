@@ -26,7 +26,7 @@ targets:
   # add all_outputs_and_obs_error_estimate.csv, obs and pred for all three models
 
   lake_surface_temp_preds:
-    command: convert_preds_tibble('in_data/all_outputs_and_obs_072621_wBachmann.csv')
+    command: convert_preds_tibble('in_data/all_outputs_and_obs_081021_wBachmann.csv')
 
   obs_metadata:
     command: subset_tbl(metadata_tbl, I('site_id'),

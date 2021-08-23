@@ -341,7 +341,7 @@ entities:
     -
       attr-label: cluster_id
       attr-def: >-
-        NEED JARED TEXT HERE
+        Numeric identifier for which of the 16 k-means clusters of lakes based on latitude, longitude, and surface area.
       attr-defs: >-
         Willard et al., 2021
       data-min: 1
@@ -350,7 +350,7 @@ entities:
     -
       attr-label: fold_id
       attr-def: >-
-        NEED JARED TEXT HERE
+        Numeric identifier for which of the 5 equal groups of lakes used for nested cross validation. Each cluster (cluster_id) of lakes is equally divided among the 5 fold_ids.
       attr-defs: >-
         Willard et al., 2021
       data-min: 1
