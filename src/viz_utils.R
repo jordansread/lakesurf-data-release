@@ -38,20 +38,30 @@ plot_time_season_accuracy <- function(fileout, preds_obs_fl){
   png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
   par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
 
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(0.67, 1.42),
-       ylab = "Median lake validation RMSE (°C)", xlab = "", axes = FALSE)
+  plot(NA, NA, xlim = c(1980, 2020), ylim = c(0.72, 1.62),
+       ylab = "EA-LSTM median lake test RMSE (°C)", xlab = "", axes = FALSE)
 
   axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
   axis(2, at = seq(0,10, by = 0.2), las = 1, tck = -0.01)
 
+  y0 <- 1.55
+  x0 <- 2013.5 # midpoint of legend line
+  y_bmp <- 0.07
+  x_wid <- 3.5
+
   for (var in c('spring', 'summer', 'fall', 'winter')){
     filter(plot_data, season == var) %>% (function(x){
       points(x$year, x$rmse, col = x$col, pch = 16, cex = 0.6)
-      lines(x$year, x$rmse, col = x$col[1], lwd = 2)
+      lines(x$year, x$rmse, col = x$col[1L], lwd = 2)
+      # add legend here:
+      lines(c(x0-x_wid/2, x0+x_wid/2), c(y0, y0), lwd = 2.5, col = x$col[1L])
+      points(x0, y0, col = x$col, pch = 16, cex = 0.8)
+      # then text:
+      text(x0+x_wid/2, y0, stringr::str_to_sentence(var), pos = 4, offset = 0.55)
+      # bump the y starting point up
+      y0 <<- y0 - y_bmp
       })
   }
-
-
   dev.off()
 }
 
@@ -171,7 +181,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
   x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
   text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
   add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L,
-                 title = c(sprintf('%s-predicted', get_model_type(model_id)), 'validation error (RMSE °C)'))
+                 title = c(sprintf('%s', get_model_type(model_id)), 'test error (RMSE °C)'))
   par(old_par)
 }
 
@@ -324,6 +334,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
   box()
   axis(1, at = seq(0, 40, by = 5), tck = -0.01)
   axis(2, at = seq(0, 40, by = 5), las = 1, tck = -0.01)
+  abline(0,1, col = 'grey30', lwd = 0.5)
   abline(0,1, lty = 'dashed')
   plot_dims <- par('usr')
   y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
