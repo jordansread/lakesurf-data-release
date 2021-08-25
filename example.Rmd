@@ -55,9 +55,8 @@ Now, use the information in the metadata table to construct a file name for the 
 
 predict_fl <- file.path(data_dir, sprintf("%s_predicted_temp_%s.nc", mendota_info$group_id, mendota_info$group_bbox))
 weather_fl <- file.path(data_dir, sprintf("%s_weather_%s.nc", mendota_info$group_id, mendota_info$group_bbox))
+# check ?sprintf() if you are unfamiliar with it
 
-# check the file name in case you aren't familiar with what sprintf() does:
-predict_fl
 # make sure you have this file locally:
 file.exists(predict_fl)
 ```
@@ -106,19 +105,27 @@ library(sf) # I used packageVersion 0.9.8 for this
 time_idx <- which(time == as.Date('2017-07-01'))
 ```
 Open back up the prediction file. Keep in mind this is one of three prediction files, so if you want data for the complete Contiguous U.S., you need to combine data from all three files. 
+
+Set the data up to be ready to plot for the whole dataset:
 ```{r}
-nc <- nc_open(predict_fl)
-# get temperature for a single day but for all lakes at once:
-all_surftemp <- ncvar_get(nc, 'surftemp', start = c(time_idx, 1), count = c(1, -1))
-lake_lat <-  ncvar_get(nc, 'lat')
-lake_lon <-  ncvar_get(nc, 'lon')
-nc_close(nc)
-```
-Now set up data for a plot, and then plot July 1st temperatures estimated for these lakes using ggplot2:
-```{r, plot_all}
-plot_data <- tibble(surftemp = all_surftemp, lat = lake_lat, lon = lake_lon) %>% 
+pred_fls <- all_metadata %>% mutate(filepath = file.path(data_dir, sprintf("%s_predicted_temp_%s.nc", group_id, group_bbox))) %>%
+  pull(filepath) %>% unique()
+
+plot_data <- purrr::map(pred_fls, function(pred_fl){
+    nc <- nc_open(pred_fl)
+    # get temperature for a single day but for all lakes at once:
+    all_surftemp <- ncvar_get(nc, 'surftemp', start = c(time_idx, 1), count = c(1, -1))
+    lake_lat <-  ncvar_get(nc, 'lat')
+    lake_lon <-  ncvar_get(nc, 'lon')
+    nc_close(nc)
+    tibble(surftemp = all_surftemp, lat = lake_lat, lon = lake_lon)
+  }) %>% bind_rows() %>% 
   st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
   st_transform("+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs")
+
+```
+Plot July 1st temperatures estimated for these lakes using ggplot2:
+```{r, plot_all}
 
 ggplot() +
   geom_sf(data = plot_data, size = 0.5, aes(col=surftemp)) + 
