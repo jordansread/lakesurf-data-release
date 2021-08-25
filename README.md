@@ -348,3 +348,4 @@ var = 'surftemp'
 da = ds[var].sel(time=select_time)
 plot_surftemp(da, label=f'{var}:{select_time}')
 ```
+![](example_files/figure-gfm/pyviz_data_snapshot.png)<!-- -->
