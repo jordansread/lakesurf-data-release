@@ -131,3 +131,67 @@ ggplot() +
   geom_sf(data = plot_data, size = 0.5, aes(col=surftemp)) + 
   scale_colour_viridis_c(option = "magma")
 ```
+
+### Python
+
+This example uses python3. I installed fsspec, xarray, hvplot, s3fs, h5netcdf, dask, pykdtree, scipy, pyproj, datashader, and GeoViews. This example was created based off of Rich Signell's notebook
+
+```python
+import fsspec
+import xarray as xr
+import numpy as np
+import hvplot.pandas
+import geoviews as gv
+from holoviews.operation.datashader import rasterize
+
+url = 's3://prod-is-usgs-sb-prod-publish/60341c3ed34eb12031172aa6/01_predicted_temp_N24-53_W98-126.nc'
+
+```
+verify we have access
+```python
+fs = fsspec.filesystem('s3', anon=True)
+fs.size(url)
+[1] 1180271102
+```
+open the dataset and request chunks:
+```python
+ds = xr.open_dataset(fs.open(url), chunks={'time':24})
+ds.surftemp
+<xarray.DataArray 'surftemp' (site_id: 62560, time: 14976)>
+dask.array<open_dataset-75f138412ff0f0130631cfe4fbaae841surftemp, shape=(62560, 14976), dtype=float64, chunksize=(62560, 24), chunktype=numpy.ndarray>
+Coordinates:
+    alt      (site_id) float64 dask.array<chunksize=(62560,), meta=np.ndarray>
+    lat      (site_id) float64 dask.array<chunksize=(62560,), meta=np.ndarray>
+    lon      (site_id) float64 dask.array<chunksize=(62560,), meta=np.ndarray>
+  * site_id  (site_id) |S44 b'nhdhr_{C0902D8E-5338-4023-B399-F6758BDDD6A1}' ....
+  * time     (time) datetime64[ns] 1980-01-01 1980-01-02 ... 2020-12-31
+Attributes:
+    units:                    °C
+    long_name:                Surface water temperature [°C]
+    least_significant_digit:  [2]
+
+```
+
+define a plotting function for use later
+```python
+def plot_surftemp(da, label=None):
+    # Convert Xarray to Pandas dataframe so we can use hvplot.points for visualization
+    df = da.to_pandas().to_frame()
+    #The dataframe just has streamflow, so add longitude and latitude as columns
+    df = df.assign(latitude=ds['lat'])
+    df = df.assign(longitude=ds['lon'])
+    df.rename(columns={0: "surftemp"}, inplace=True)
+    p = df.hvplot.points('longitude', 'latitude', geo=True,
+                     c='surftemp', colorbar=True, size=14, label=label)
+    return (p * gv.tile_sources.OSM)
+```
+select a time slice and plot
+```python
+select_time = '2017-06-01'
+var = 'surftemp'
+da = ds[var].sel(time=select_time)
+plot_surftemp(da, label=f'{var}:{select_time}')
+
+```
+
+
