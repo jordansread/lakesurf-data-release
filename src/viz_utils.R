@@ -13,6 +13,48 @@ get_model_type <- function(model_id){
   c(wtemp_EALSTM = 'EA-LSTM', wtemp_ERA5 = 'ERA5', wtemp_LM = 'Bachmann LM')[[model_id]]
 }
 
+plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
+  # plot yearly (median) RMSE
+  # plot DoY median bias for 3 day chunks
+  # plot temperature bias for 3°C chunks
+  # obs count vs RMSE
+
+
+  # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
+  # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
+  # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
+  sesn_cols <- get_cols()
+  plot_data <- read_csv(preds_obs_fl) %>%
+    mutate(doy = lubridate::yday(Date),
+           year = lubridate::year(Date),
+           season = case_when(
+             !is.na(wtemp_LM) ~ 'summer',
+             TRUE ~ 'other')
+    ) %>%
+    # was calculating lake/season/year-specific RMSE before, then taking median.
+    #    group_by(season, year, site_id) %>%
+    group_by(season, year) %>%
+    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
+                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE)))
+
+  title_text <- sprintf('%s test error (RMSE °C)', get_model_type(model_id))
+  if (model_id == 'wtemp_ERA5'){
+    title_text[1L] <- paste0('*debiased ', title_text[1L])
+  }
+
+  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
+  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+
+  plot(NA, NA, xlim = c(1980, 2020), ylim = c(1.3, 3.1),
+       ylab = title_text,
+       xlab = "", axes = FALSE)
+  filter(plot_data, season == 'summer') %>% {points(.$year, .$rmse, col = 'black', type = 'o', pch = 16, lwd = 2)}
+  filter(plot_data, season == 'other') %>% {points(.$year, .$rmse, col = 'grey40', type = 'o', pch = 22, lty = 'dashed', bg = 'white', lwd = 2)}
+  axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
+  axis(2, at = seq(0,10, by = 0.5), las = 1, tck = -0.01)
+  dev.off()
+}
+
 plot_time_season_accuracy <- function(fileout, preds_obs_fl){
 
   sesn_cols <- get_cols()
@@ -25,9 +67,11 @@ plot_time_season_accuracy <- function(fileout, preds_obs_fl){
              doy >= 265 & doy < 355 ~ 'fall',
              doy >= 355 | doy < 79 ~ 'winter')
            ) %>%
-    group_by(season, year, site_id) %>%
-    summarize(rmse = rmse(wtemp_EALSTM, wtemp_obs)) %>%
-    group_by(season, year) %>% summarize(rmse = median(rmse)) %>%
+    # was calculating lake/season/year-specific RMSE before, then taking median.
+    #    group_by(season, year, site_id) %>%
+    group_by(season, year) %>%
+    summarize(rmse = rmse(wtemp_ERA5+3.47, wtemp_obs)) %>%
+    #group_by(season, year) %>% summarize(rmse = median(rmse)) %>%
     mutate(col = case_when(
       season == 'spring' ~ filter(sesn_cols, season == 'spring')$col,
       season == 'summer' ~ filter(sesn_cols, season == 'summer')$col,
@@ -38,11 +82,11 @@ plot_time_season_accuracy <- function(fileout, preds_obs_fl){
   png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
   par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
 
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(0.72, 1.62),
+  plot(NA, NA, xlim = c(1980, 2020), ylim = c(1, 2.8),
        ylab = "EA-LSTM median lake test RMSE (°C)", xlab = "", axes = FALSE)
 
   axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
-  axis(2, at = seq(0,10, by = 0.2), las = 1, tck = -0.01)
+  axis(2, at = seq(0,10, by = 0.5), las = 1, tck = -0.01)
 
   y0 <- 1.55
   x0 <- 2013.5 # midpoint of legend line
@@ -145,7 +189,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     mutate(cell_id = row_number()) %>%
     st_transform(plot_proj)
 
-  bin_breaks <- c(0, seq(0.75, 5.75, by = 0.05), 20)
+  bin_breaks <- c(0, seq(0.75, 5, by = 0.05), 20)
   n_cols <- length(bin_breaks) - 1
 
   col_tbl <- tibble(val = bin_breaks,
@@ -161,7 +205,9 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     st_drop_geometry() %>% select(cell_id, site_id) %>%
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
-    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs)^2, na.rm=TRUE)),
+    # debiasing!!
+    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
+                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE)),
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
@@ -180,8 +226,12 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
   y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
   x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
   text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
+  title_text <- c(sprintf('%s', get_model_type(model_id)), 'test error (RMSE °C)')
+  if (model_id == 'wtemp_ERA5'){
+    title_text[1L] <- paste0('*debiased ', title_text[1L])
+  }
   add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L,
-                 title = c(sprintf('%s', get_model_type(model_id)), 'test error (RMSE °C)'))
+                 title = title_text)
   par(old_par)
 }
 
@@ -315,8 +365,10 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
 
   # lat is y, lon is x. Lon comes first:
-  acc_vals <- read_csv(preds_obs_fl, col_types = 'cDdddd') %>%
-    filter(!is.na(!!rlang::sym(model_id))) %>%
+  preds_data <- read_csv(preds_obs_fl, col_types = 'cDdddd') %>%
+    filter(!is.na(!!rlang::sym(model_id)))
+
+  acc_vals <- preds_data %>%
     st_as_sf(coords = c("wtemp_obs", model_id)) %>%
     st_intersection(acc_grid, .) %>%
     st_drop_geometry() %>% select(cell_id) %>%
@@ -336,10 +388,20 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
   axis(2, at = seq(0, 40, by = 5), las = 1, tck = -0.01)
   abline(0,1, col = 'grey30', lwd = 0.5)
   abline(0,1, lty = 'dashed')
+  if (model_id == "wtemp_ERA5"){
+    abline(-3.47,1, lty = "dotted")
+  }
   plot_dims <- par('usr')
   y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  y_rmse <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.073
+  y_rmse2 <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.133
   x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.039
   text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
+
+  text(x = x_panel, y = y_rmse, sprintf("RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs),2)), pos = 4)
+  if (model_id == "wtemp_ERA5"){
+    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]]+3.47, preds_data$wtemp_obs),2)), pos = 4)
+  }
   y_leg_prc <- 0.02 # bottom edge of colors
   x_leg_prc <- 0.88 # right edge of colors
 
