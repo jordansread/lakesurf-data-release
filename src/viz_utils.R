@@ -55,6 +55,113 @@ plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
   dev.off()
 }
 
+plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
+  # plot yearly (median) RMSE
+  # plot DoY median bias for 3 day chunks
+  # plot temperature bias for 3°C chunks
+  # obs count vs RMSE
+
+
+  # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
+  # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
+  # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
+
+  low_bin <- 0
+  high_bin <- 366
+  bin_w <- 13
+  # make sure the last bin is inclusive of leap year
+  bin_breaks <- c(seq(low_bin, high_bin - bin_w, by = bin_w), high_bin + 10)
+  plot_data <- read_csv(preds_obs_fl) %>%
+    mutate(doy = lubridate::yday(Date),
+           upper_doy_bin = cut(doy, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
+    # PROBABLY want to combine DOY 366 with 365 samples
+    group_by(upper_doy_bin) %>%
+    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE))
+
+
+  title_text <- sprintf('%s prediction bias(°C)', get_model_type(model_id))
+  # if (model_id == 'wtemp_ERA5'){
+  #   title_text[1L] <- paste0('*debiased ', title_text[1L])
+  # }
+
+  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
+  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+
+  plot(NA, NA, ylim = c(0, 366), xlim = c(-7, 7),
+       ylab = title_text,
+       xlab = "", axes = FALSE)
+
+  # need to plot these as DOY bins!
+  for (bin in unique(plot_data$upper_doy_bin)){
+    these_data <- plot_data %>% filter(upper_doy_bin == bin)
+    bias <- these_data$bias
+    col <- ifelse(bias < 0, "#00204DFF", "#FFEA46FF")
+    rect(xleft = 0, xright = bias, ybottom = bin - bin_w, ytop = bin, col = scales::alpha(col, alpha = 0.5))
+    # if (model_id == 'wtemp_ERA5'){
+    #   col <- ifelse(bias < -3.47, "#00204DFF", "#FFEA46FF")
+    #   rect(xleft = -3.47, xright = bias, ybottom = bin - bin_w, ytop = bin, col = col, alpha = 0.5, border = col, density = 15)
+    # }
+  }
+
+  axis(1, at = seq(0, 400, by = 50), tck = -0.01)
+  axis(2, at = seq(-10,10, by = 0.5), las = 1, tck = -0.01)
+  abline(h = 0)
+  dev.off()
+}
+
+plot_tempbin_bias <- function(fileout, preds_obs_fl, model_id){
+  # plot yearly (median) RMSE
+  # plot DoY median bias for 3 day chunks
+  # plot temperature bias for 3°C chunks
+  # obs count vs RMSE
+
+
+  # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
+  # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
+  # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
+
+  low_bin <- 0
+  high_bin <- 36
+  bin_w <- 2
+  obs_min <- 100 # minimum number of obs in a bin for plotting
+  bin_breaks <- seq(low_bin, high_bin, by = bin_w)
+  plot_data <- read_csv(preds_obs_fl) %>%
+    filter(wtemp_obs >= low_bin & wtemp_obs < high_bin) %>%
+    mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
+    group_by(upper_wtemp_bin) %>%
+    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE),
+              n_obs = sum(!is.na(!!rlang::sym(model_id)))) %>%
+    filter(n_obs > obs_min)
+
+  title_text <- sprintf('%s prediction bias (°C)', get_model_type(model_id))
+  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
+  par(omi = c(0,0,0.05,0.05), mai = c(1,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5, xaxs = 'i', yaxs = 'i')
+
+  plot(NA, NA, xlim = c(-7.2,5.8), ylim = c(0, 37),
+       ylab = "Observed surface water temperature (°C)",
+       xlab = title_text, axes = FALSE)
+  # need to plot these as 2°C bins!
+  for (bin in unique(plot_data$upper_wtemp_bin)){
+    these_data <- plot_data %>% filter(upper_wtemp_bin == bin)
+    bias <- these_data$bias
+    col <- ifelse(bias < 0, "#00204DFF", "#FFEA46FF")
+    rect(xleft = 0, xright = bias, ybottom = bin - bin_w, ytop = bin, col = scales::alpha(col, alpha = 0.5))
+    if (model_id == 'wtemp_ERA5'){
+      col <- ifelse(bias < -3.47, "#00204DFF", "#FFEA46FF")
+      rect(xleft = -3.47, xright = bias, ybottom = bin - bin_w, ytop = bin, col = col, alpha = 0.5, border = col, density = 15)
+    }
+  }
+  abline(v = 0)
+  if (model_id == 'wtemp_ERA5'){
+    abline(v = -3.47, col = 'grey70')
+    abline(v = -3.47, lty = 'dashed')
+  }
+
+  axis(1, at = seq(-10, 10, by = 1), tck = -0.01)
+  axis(2, at = seq(0,40, by = 5), las = 1, tck = -0.01)
+  dev.off()
+}
+
 plot_time_season_accuracy <- function(fileout, preds_obs_fl){
 
   sesn_cols <- get_cols()
