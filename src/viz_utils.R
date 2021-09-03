@@ -55,6 +55,48 @@ plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
   dev.off()
 }
 
+
+plot_year_bias <- function(fileout, preds_obs_fl, model_id){
+  # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
+  # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
+  # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
+  plot_data <- read_csv(preds_obs_fl) %>%
+    mutate(doy = lubridate::yday(Date),
+           year = lubridate::year(Date)) %>%
+    # was calculating lake/season/year-specific RMSE before, then taking median.
+    #    group_by(season, year, site_id) %>%
+    group_by(year) %>%
+    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm=TRUE))
+
+  title_text <- sprintf('%s bias (°C)', get_model_type(model_id))
+
+  bias_col <- get_bias_colors()
+
+  png(file = fileout, width = 6, height = 6, units = 'in', res = 250)
+  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+
+  plot(NA, NA, xlim = c(1980, 2020), ylim = c(-4.3, 1.1),
+       ylab = title_text,
+       xlab = "", axes = FALSE)
+  for (year in 1980:2020){
+    these_data <- filter(plot_data, year == !!year)
+
+    bias <- these_data$bias
+    col <- ifelse(bias < 0, bias_col$cold, bias_col$hot)
+    rect(xleft = year-0.5, xright = year+0.5, ybottom = 0, ytop = these_data$bias, col = scales::alpha(col, alpha = 0.5), border = col)
+  }
+  abline(h = 0)
+  if (model_id == 'wtemp_ERA5'){
+    abline(h = -3.47, lty = 'dashed')
+  }
+  axis(1, at = seq(1970, 2030, by = 10), tck = -0.01)
+  axis(2, at = seq(-10,10, by = 1), las = 1, tck = -0.01)
+  dev.off()
+}
+
+get_bias_colors <- function(){
+  tibble('hot' = '#fc8d62', cold = "#00204DFF")
+}
 plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
   # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
@@ -68,7 +110,7 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
 
   low_bin <- 0
   high_bin <- 366
-  bin_w <- 13
+  bin_w <- 3
   # make sure the last bin is inclusive of leap year
   bin_breaks <- c(seq(low_bin, high_bin - bin_w, by = bin_w), high_bin + 10)
   plot_data <- read_csv(preds_obs_fl) %>%
@@ -84,28 +126,100 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
   #   title_text[1L] <- paste0('*debiased ', title_text[1L])
   # }
 
-  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+  png(file = fileout, width = 6, height = 6, units = 'in', res = 250)
+  par(omi = c(0.05,0.05,0.05,0.05), mai = c(0,0,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
 
-  plot(NA, NA, ylim = c(0, 366), xlim = c(-7, 7),
+  zer_bias_r <- 6
+
+  plot(NA, NA, ylim = c(-zer_bias_r - 2, zer_bias_r + 2), xlim = c(-zer_bias_r - 2, zer_bias_r + 2),
        ylab = title_text,
        xlab = "", axes = FALSE)
+
+  bias_col <- get_bias_colors()
+
 
   # need to plot these as DOY bins!
   for (bin in unique(plot_data$upper_doy_bin)){
     these_data <- plot_data %>% filter(upper_doy_bin == bin)
     bias <- these_data$bias
-    col <- ifelse(bias < 0, "#00204DFF", "#FFEA46FF")
-    rect(xleft = 0, xright = bias, ybottom = bin - bin_w, ytop = bin, col = scales::alpha(col, alpha = 0.5))
-    # if (model_id == 'wtemp_ERA5'){
-    #   col <- ifelse(bias < -3.47, "#00204DFF", "#FFEA46FF")
-    #   rect(xleft = -3.47, xright = bias, ybottom = bin - bin_w, ytop = bin, col = col, alpha = 0.5, border = col, density = 15)
-    # }
+    col <- ifelse(bias < 0, bias_col$cold, bias_col$hot)
+    upper_alpha <- 2*pi * bin / high_bin
+    lower_alpha <- 2*pi * (bin-bin_w) / high_bin
+    upper_y0 <- cos(upper_alpha) * (bias+zer_bias_r)
+    upper_y1 <- cos(upper_alpha) * zer_bias_r
+    lower_y0 <- cos(lower_alpha) * (bias+zer_bias_r)
+    lower_y1 <- cos(lower_alpha) * zer_bias_r
+    upper_x0 <- sin(upper_alpha) * (bias+zer_bias_r)
+    upper_x1 <- sin(upper_alpha) * zer_bias_r
+    lower_x0 <- sin(lower_alpha) * (bias+zer_bias_r)
+    lower_x1 <- sin(lower_alpha) * zer_bias_r
+
+    # 0,0 is zer_bias_r bias
+
+    if(!is.na(bias)){
+      polygon(x = c(lower_x0, lower_x1, upper_x1, upper_x0, lower_x0), y = c(lower_y0, lower_y1, upper_y1, upper_y0, lower_y0),
+              col = scales::alpha(col, alpha = 0.5), border = col)
+    }
+
   }
 
-  axis(1, at = seq(0, 400, by = 50), tck = -0.01)
-  axis(2, at = seq(-10,10, by = 0.5), las = 1, tck = -0.01)
-  abline(h = 0)
+  # the seasonal boundaries:
+  seasons <- c('winter','spring','summer','fall')
+  for (doy in c(79, 170.5, 262, 353.5)){
+    alpha <- 2*pi * doy / 366
+    x0 <- sin(alpha) * (zer_bias_r + 2)
+    y0 <- cos(alpha) * (zer_bias_r + 2)
+    lines(c(0, x0), c(0, y0))
+
+    alpha <- 2*pi * (doy - 366/8) / 366
+    x0 <- sin(alpha) * (zer_bias_r + 0.5)
+    y0 <- cos(alpha) * (zer_bias_r + 0.5)
+
+    rotate_angle <- 225 - doy / 366 * 360
+    adj <- c(0.5, 0.5)
+    if (abs(rotate_angle) > 115){
+      rotate_angle = rotate_angle - 180
+    } else {
+      adj[2L] <- adj[2L] - 0.1
+    }
+    text(x0, y0, seasons[1L], srt = rotate_angle, adj = adj)
+    seasons <- tail(seasons, -1L)
+  }
+
+
+  biases <- c("+1°C" = 0.8, "0°C" = -0.1, "-1°C" = -1.2, "-2°C" = -2.2, "-3°C" = -3.2)
+  avoid_alphas <- tibble(values = c(-1:3), div = c(5,5,5,4,4), avoid_alpha = NA)
+  doy <- 103
+  for (i in 1:length(biases)){
+    alpha <- 2*pi * doy / 366
+    rotate_angle <-  90 - doy / 366 * 360
+    x0 <- sin(alpha) * (zer_bias_r + biases[i])
+    y0 <- cos(alpha) * (zer_bias_r + biases[i])
+    text(x0, y0, names(biases)[i], srt = rotate_angle, adj = adj, cex = 0.65, font = 2)
+    avoid_alphas$avoid_alpha[i] <- doy
+    doy <- doy - 3 - i/3
+  }
+
+
+  cnt = 0
+  for (doy in seq(0, 366, by = 1)){
+    cnt = cnt+1
+
+    upper_alpha <- 2*pi * doy / 366
+    lower_alpha <-  2*pi * (doy + 1) / 366
+
+    for (bias in avoid_alphas$values){
+      this_alpha <- avoid_alphas %>% filter(values == bias)
+      skip_range <- (round(this_alpha$avoid_alpha, 0) - 4):(round(this_alpha$avoid_alpha, 0) + 4)
+      # whether to plot dash:
+      if (cnt %% this_alpha$div != 0 & !(doy %in% skip_range)){
+        lines((-bias + zer_bias_r) * c(sin(upper_alpha), sin(lower_alpha)), (-bias + zer_bias_r) * c(cos(upper_alpha), cos(lower_alpha)),
+              col = 'grey20')
+      }
+    }
+
+  }
+
   dev.off()
 }
 
@@ -134,31 +248,27 @@ plot_tempbin_bias <- function(fileout, preds_obs_fl, model_id){
     filter(n_obs > obs_min)
 
   title_text <- sprintf('%s prediction bias (°C)', get_model_type(model_id))
-  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
+  png(file = fileout, width = 4, height = 6, units = 'in', res = 250)
   par(omi = c(0,0,0.05,0.05), mai = c(1,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5, xaxs = 'i', yaxs = 'i')
 
-  plot(NA, NA, xlim = c(-7.2,5.8), ylim = c(0, 37),
-       ylab = "Observed surface water temperature (°C)",
-       xlab = title_text, axes = FALSE)
+  bias_col <- get_bias_colors()
+  plot(NA, NA, ylim = c(-7.2,5.8), xlim = c(0, 37),
+       xlab = "Water temperature (°C)",
+       ylab = title_text, axes = FALSE)
   # need to plot these as 2°C bins!
   for (bin in unique(plot_data$upper_wtemp_bin)){
     these_data <- plot_data %>% filter(upper_wtemp_bin == bin)
     bias <- these_data$bias
-    col <- ifelse(bias < 0, "#00204DFF", "#FFEA46FF")
-    rect(xleft = 0, xright = bias, ybottom = bin - bin_w, ytop = bin, col = scales::alpha(col, alpha = 0.5))
-    if (model_id == 'wtemp_ERA5'){
-      col <- ifelse(bias < -3.47, "#00204DFF", "#FFEA46FF")
-      rect(xleft = -3.47, xright = bias, ybottom = bin - bin_w, ytop = bin, col = col, alpha = 0.5, border = col, density = 15)
-    }
+    col <- ifelse(bias < 0, bias_col$cold, bias_col$hot)
+    rect(xleft =  bin - bin_w, xright = bin, ybottom = 0, ytop =bias, col = scales::alpha(col, alpha = 0.5), border = col)
   }
-  abline(v = 0)
+  abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(v = -3.47, col = 'grey70')
-    abline(v = -3.47, lty = 'dashed')
+    abline(h = -3.47, lty = 'dashed')
   }
 
-  axis(1, at = seq(-10, 10, by = 1), tck = -0.01)
-  axis(2, at = seq(0,40, by = 5), las = 1, tck = -0.01)
+  axis(1, at = seq(0,40, by = 10), las = 1, tck = -0.01)
+  axis(2, at = seq(-10, 10, by = 2), tck = -0.01)
   dev.off()
 }
 
