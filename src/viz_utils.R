@@ -13,7 +13,7 @@ get_model_type <- function(model_id){
   c(wtemp_EALSTM = 'EA-LSTM', wtemp_ERA5 = 'ERA5', wtemp_LM = 'Bachmann LM')[[model_id]]
 }
 
-plot_year_accuracy <- function(preds_obs_fl, model_id){
+plot_year_accuracy <- function(preds_obs_fl, model_id, panel_text){
   # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
   # plot temperature bias for 3°C chunks
@@ -24,6 +24,9 @@ plot_year_accuracy <- function(preds_obs_fl, model_id){
   # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
   # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
   sesn_cols <- get_cols()
+  bin_breaks <- c(0, seq(1, 4.15, by = 0.05), 20)
+  col_tbl <- get_rmse_col_tbl(bin_breaks)
+
   plot_data <- read_csv(preds_obs_fl) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date)) %>%
@@ -31,18 +34,22 @@ plot_year_accuracy <- function(preds_obs_fl, model_id){
     #    group_by(season, year, site_id) %>%
     group_by(year) %>%
     summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
-                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE)))
+                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE))) %>%
+    mutate(bin = cut(rmse, breaks = bin_breaks, right = FALSE)) %>%
+    left_join(col_tbl, by = 'bin')
 
 
 
-  old_par <- par(mai = c(0.2,0.15,0,0.1), las = 1, mgp = c(1.1,0.4,0), cex= 1, xaxs = 'i', yaxs = 'i')
+  old_par <- par(mai = c(0.2,0.15,0,0.1), las = 1, mgp = c(1.1,0.15,0), cex= 1, xaxs = 'i', yaxs = 'i')
 
-  plot(NA, NA, xlim = c(1979, 2020.5), ylim = c(0.9,3.03 ),
+  plot(NA, NA, xlim = c(1979, 2020.5), ylim = c(1.30,3.0 ),
        ylab = "RMSE (°C)",
        xlab = "", axes = FALSE)
+  add_panel_cue(par('usr'), x_frac = 0.04, y_frac = 0.033, cue_text = panel_text)
 
-  plot_data %>% {points(.$year, .$rmse, col = 'black', type = 'o', pch = 16, cex = 0.7)}
-  axis(2, at = seq(-10,10, by = 1), las = 1, tck = -0.02)
+  plot_data %>% {lines(.$year, .$rmse, col = 'grey20')}
+  plot_data %>% {points(.$year, .$rmse, pch = 16, cex = 0.8, col = .$col)}
+  axis(2, at = seq(-10,10, by = 0.5), las = 1, tck = -0.02)
   par(mgp = c(2,.1,0))
   axis(1, at = seq(1900, 2040, by = 10), tck = -0.02)
   par(old_par)
@@ -98,9 +105,11 @@ get_bias_colors <- function(){
 }
 
 add_panel_cue <- function(usr, x_frac, y_frac, cue_text, cex = 1.1){
+  old_par <- par(xpd = NA)
   y_panel <- usr[4] - (usr[4] - usr[3]) * y_frac
   x_panel <- usr[1] + (usr[2] - usr[1]) * x_frac
   text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), cue_text, cex = cex)
+  par(old_par)
 }
 plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   # plot yearly (median) RMSE
@@ -282,9 +291,12 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   par(mgp = c(2,.1,0))
 
-  axis(1, at = c(-10, 0, 36, 100), las = 1, tck = -0.015)
+  axis(1, at = c(-10, 0, 36, 100), labels = NA, las = 1, tck = -0.015)
+  par(xpd = NA)
+  axis(1, at = c(-10, 0, 38.25, 100), labels = c(NA, '0', '36°C', NA), tck = 0, lwd = 0)
+  par(xpd = FALSE)
   par(cex = 0.9, mgp = c(2,0,0))
-  axis(1, at = 17.8, labels = 'Temperature (°C)', las = 1, tck = 0)
+  axis(1, at = 17.8, labels = 'Temperature', las = 1, tck = 0)
   axis(2, at = seq(-10, 10, by = 2), labels = NA, tck = -0.015)
 
   par(old_par)
@@ -353,6 +365,19 @@ plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
   par(old_par)
 }
 
+get_rmse_col_tbl <- function(bin_breaks){
+
+  n_cols <- length(bin_breaks) - 1
+
+  tibble(val = bin_breaks,
+         col = c(viridis::inferno(n = n_cols),
+                 # we want all values above a certain threshold to be the same color
+                 rep(tail(viridis::inferno(n = n_cols), 1L),
+                     times = length(bin_breaks) - n_cols)),
+         bin = cut(val, breaks = bin_breaks, right = F)) %>%
+    select(-val)
+}
+
 plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id, panel_text){
 
   min_obs <- 100 # minimum number of observations per cell to plot a color
@@ -370,16 +395,9 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     mutate(cell_id = row_number()) %>%
     st_transform(plot_proj)
 
-  bin_breaks <- c(0, seq(0.75, 5, by = 0.05), 20)
-  n_cols <- length(bin_breaks) - 1
+  bin_breaks <- c(0, seq(0.95, 4.25, by = 0.05), 20)
 
-  col_tbl <- tibble(val = bin_breaks,
-         col = c(viridis::inferno(n = n_cols),
-                 # we want all values above a certain threshold to be the same color
-                 rep(tail(viridis::inferno(n = n_cols), 1L),
-                     times = length(bin_breaks) - n_cols)),
-         bin = cut(val, breaks = bin_breaks, right = F)) %>%
-    select(-val)
+  col_tbl <- get_rmse_col_tbl(bin_breaks)
 
   cell_obs <- st_transform(sites_sf, plot_proj) %>%
     st_intersection(site_grid, .) %>%
@@ -404,10 +422,10 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
   plot_dims <- par('usr')
-  add_panel_cue(usr = plot_dims, x_frac = 0.02, y_frac = 0.033, cue_text = panel_text, cex = 1.3)
+  add_panel_cue(usr = plot_dims, x_frac = 0.01, y_frac = 0.033, cue_text = panel_text, cex = 1.6)
   par(old_par)
   old_par <- par(cex = 1.0)
-  add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L,
+  add_map_legend(plot_dims, bin_breaks, col_fun = viridis::inferno, col_fun_dir = 1L,
                  title = "", y_frac = 0.13, total_leg_prc = 0.25)
   par(old_par)
 }
@@ -466,7 +484,7 @@ plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_tex
   y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
   x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
   text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
-  add_map_legend(plot_dims, bin_breaks, n_cols,
+  add_map_legend(plot_dims, bin_breaks,
                  col_fun = viridis::mako, col_fun_dir = -1L,
                  title = 'Number of observed lakes (#)',
                  total_leg_prc = 0.42)
@@ -475,7 +493,8 @@ plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_tex
 }
 
 
-add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title, total_leg_prc = 0.3, x_frac = 0.01, y_frac = 0.025){
+add_map_legend <- function(plot_dims, bin_breaks, col_fun, col_fun_dir, title, total_leg_prc = 0.3, x_frac = 0.01, y_frac = 0.025){
+  n_cols = length(bin_breaks)-1
   bin_w_prc <- total_leg_prc / n_cols
   bin_h_prc <- 0.045
   bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
@@ -620,37 +639,40 @@ plot_coverage_panel <- function(fileout, centroids_sf, metadata_fl, preds_obs_fl
   dev.off()
 }
 
-plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
+plot_accuracy_panel <- function(fileout, metadata_fl, preds_obs_fl,
                                  accuracy_cellsize = 0.5,
                                  space_cellsize = 1,
                                  model_ids){
   # (fig h - omi[3] - omi[4])/3 needs to be the same as
-  # (fig w - omi[1] - omi[2])* 5 / 11
+  # (fig w - omi[1] - omi[2])* nbin[3] / sum(nbin)
   png(file = fileout, width = 7.2, height = 9.85, units = 'in', res = 250)
+  nbin <- c(1,5,5)
   par(omi = c(0,0,0.05,0.05), mai = c(0,0,0,0), las = 1, xaxs = 'i', yaxs = 'i')
   panel_chars <- paste0(letters, ')')
-  layout(matrix(c(1, 2,2,2,2,2, 3,3,3,3,3,
-                  1, 2,2,2,2,2, 3,3,3,3,3,
-                  1, 4,4,4,4,4, 3,3,3,3,3,
+  layout(matrix(c(1, rep(2,nbin[2]), rep(3,nbin[3]),
+                  1, rep(2,nbin[2]), rep(3,nbin[3]),
+                  1, rep(4,nbin[2]), rep(3,nbin[3]),
 
-                  5, 6,6,6,6,6, 7,7,7,7,7,
-                  5, 6,6,6,6,6, 7,7,7,7,7,
-                  5, 8,8,8,8,8, 7,7,7,7,7,
+                  5, rep(6,nbin[2]), rep(7,nbin[3]),
+                  5, rep(6,nbin[2]), rep(7,nbin[3]),
+                  5, rep(8,nbin[2]), rep(7,nbin[3]),
 
-                  9, 10,10,10,10,10, 11,11,11,11,11,
-                  9, 10,10,10,10,10, 11,11,11,11,11,
-                  9, 12,12,12,12,12, 11,11,11,11,11),
+                  9, rep(10,nbin[2]), rep(11,nbin[3]),
+                  9, rep(10,nbin[2]), rep(11,nbin[3]),
+                  9, rep(12,nbin[2]), rep(11,nbin[3])),
                 nrow = 9, byrow = TRUE))
 
-  for (j in 1:3){
+  for (j in 1:3
+       ){
 
     title_text <- sprintf('%s test error (RMSE °C)', get_model_type(model_ids[j]))
     if (model_ids[j] == 'wtemp_ERA5'){
-      title_text <- sprintf('%s test error (*RMSE °C; debiased)', get_model_type(model_ids[j]))
+      title_text <- sprintf('%s* test error (debiased; RMSE °C)', get_model_type(model_ids[j]))
     }
 
     plot(1,1, pch = NA, xlim = c(0,1), ylim = c(0,1), axes = FALSE)
-    text(0.65, 0.5, srt = 90, title_text, cex = 1.5)
+    # nudge x and y here to adjust this double-wrap plot title:
+    text(0.55, 0.5, srt = 90, title_text, cex = 1.5)
     plot_spatial_accuracy(metadata_fl, preds_obs_fl,
                           cellsize = space_cellsize,
                           model_id = model_ids[j],
@@ -662,7 +684,8 @@ plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
                   model_id = model_ids[j],
                   panel_text = panel_chars[1L])
     panel_chars <- panel_chars[-1L]
-    plot_year_accuracy(preds_obs_fl, model_id = model_ids[j])
+    plot_year_accuracy(preds_obs_fl, model_id = model_ids[j], panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
   }
 
   dev.off()

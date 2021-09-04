@@ -13,18 +13,12 @@ sources:
 targets:
   4_viz:
     depends:
-      - out_viz/time_season_accuracy.png
       - out_viz/accuracy_panel.png
       - out_viz/data_coverage_panel.png
-      - out_viz/EA-LSTM_time_value_accuracy_bias.png
-      - out_viz/ERA5_time_value_accuracy_bias.png
-      - out_viz/LM_time_value_accuracy_bias.png
-
-  out_viz/time_season_accuracy.png:
-    command: plot_time_season_accuracy(target_name, 'out_data/lake_surface_temp_preds.csv')
+      - out_viz/bias_panel.png
 
   out_viz/accuracy_panel.png:
-    command: plot_space_raw_panel(target_name, 'out_data/lake_metadata.csv',
+    command: plot_accuracy_panel(target_name, 'out_data/lake_metadata.csv',
       preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
       accuracy_cellsize = 0.5,
       space_cellsize = 1,
