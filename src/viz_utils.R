@@ -56,7 +56,7 @@ plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
 }
 
 
-plot_year_bias <- function(fileout, preds_obs_fl, model_id){
+plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
   # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
   # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
@@ -72,12 +72,14 @@ plot_year_bias <- function(fileout, preds_obs_fl, model_id){
 
   bias_col <- get_bias_colors()
 
-  png(file = fileout, width = 6, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+  old_par <- par(mai = c(0.4,0.5,0,0.1), las = 1, mgp = c(1.3,0.4,0), cex= 1.1,xaxs = 'i', yaxs = 'i')
 
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(-4.3, 1.1),
+  plot(NA, NA, xlim = c(1979, 2020.5), ylim = ylim,
        ylab = title_text,
        xlab = "", axes = FALSE)
+
+  add_panel_cue(par('usr'), x_frac = 0.07, y_frac = 0.033, cue_text = panel_text)
+
   for (year in 1980:2020){
     these_data <- filter(plot_data, year == !!year)
 
@@ -89,15 +91,25 @@ plot_year_bias <- function(fileout, preds_obs_fl, model_id){
   if (model_id == 'wtemp_ERA5'){
     abline(h = -3.47, lty = 'dashed')
   }
-  axis(1, at = seq(1970, 2030, by = 10), tck = -0.01)
-  axis(2, at = seq(-10,10, by = 1), las = 1, tck = -0.01)
-  dev.off()
+
+  axis(2, at = seq(-10,10, by = 2), las = 1, tck = -0.01)
+  par(mgp = c(2,.1,0))
+  axis(1, at = c(1900, 1980, 2010, 2040), tck = -0.01)
+  par(cex = 0.9, mgp = c(2,0,0))
+  axis(1, at = 1995, labels = 'Year', las = 1, tck = 0)
+  par(old_par)
 }
 
 get_bias_colors <- function(){
   tibble('hot' = '#fc8d62', cold = "#00204DFF")
 }
-plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
+
+add_panel_cue <- function(usr, x_frac, y_frac, cue_text, cex = 1.1){
+  y_panel <- usr[4] - (usr[4] - usr[3]) * y_frac
+  x_panel <- usr[1] + (usr[2] - usr[1]) * x_frac
+  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), cue_text, cex = cex)
+}
+plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
   # plot temperature bias for 3°C chunks
@@ -122,18 +134,16 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
 
 
   title_text <- sprintf('%s prediction bias(°C)', get_model_type(model_id))
-  # if (model_id == 'wtemp_ERA5'){
-  #   title_text[1L] <- paste0('*debiased ', title_text[1L])
-  # }
 
-  png(file = fileout, width = 6, height = 6, units = 'in', res = 250)
-  par(omi = c(0.05,0.05,0.05,0.05), mai = c(0,0,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
+  old_par <- par(mai = c(0,0,0,0), cex= 1.1, las = 1, mgp = c(2,.5,0))
 
   zer_bias_r <- 6
 
   plot(NA, NA, ylim = c(-zer_bias_r - 2, zer_bias_r + 2), xlim = c(-zer_bias_r - 2, zer_bias_r + 2),
        ylab = title_text,
        xlab = "", axes = FALSE)
+
+  add_panel_cue(par('usr'), x_frac = 0.1, y_frac = 0.033, cue_text = panel_text)
 
   bias_col <- get_bias_colors()
 
@@ -166,14 +176,16 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
   # the seasonal boundaries:
   seasons <- c('winter','spring','summer','fall')
   for (doy in c(79, 170.5, 262, 353.5)){
+    # create the ray for each season divider:
     alpha <- 2*pi * doy / 366
     x0 <- sin(alpha) * (zer_bias_r + 2)
     y0 <- cos(alpha) * (zer_bias_r + 2)
     lines(c(0, x0), c(0, y0))
 
+    # now the text position:
     alpha <- 2*pi * (doy - 366/8) / 366
-    x0 <- sin(alpha) * (zer_bias_r + 0.5)
-    y0 <- cos(alpha) * (zer_bias_r + 0.5)
+    x0 <- sin(alpha) * (zer_bias_r + 1.6)
+    y0 <- cos(alpha) * (zer_bias_r + 1.6)
 
     rotate_angle <- 225 - doy / 366 * 360
     adj <- c(0.5, 0.5)
@@ -182,22 +194,25 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
     } else {
       adj[2L] <- adj[2L] - 0.1
     }
+    par(cex = 1.2)
     text(x0, y0, seasons[1L], srt = rotate_angle, adj = adj)
     seasons <- tail(seasons, -1L)
   }
 
 
-  biases <- c("+1°C" = 0.8, "0°C" = -0.1, "-1°C" = -1.2, "-2°C" = -2.2, "-3°C" = -3.2)
+  biases <- c("+1°C" = 0.85, "0°C" = -0.05, "-1°C" = -1.15, "-2°C" = -2.15, "-3°C" = -3.15)
   avoid_alphas <- tibble(values = c(-1:3), div = c(5,5,5,4,4), avoid_alpha = NA)
-  doy <- 103
+  doy <- 105
   for (i in 1:length(biases)){
     alpha <- 2*pi * doy / 366
     rotate_angle <-  90 - doy / 366 * 360
     x0 <- sin(alpha) * (zer_bias_r + biases[i])
     y0 <- cos(alpha) * (zer_bias_r + biases[i])
-    text(x0, y0, names(biases)[i], srt = rotate_angle, adj = adj, cex = 0.65, font = 2)
+    text(x0, y0, names(biases)[i], srt = rotate_angle, adj = adj, cex = 0.5, font = 2)
     avoid_alphas$avoid_alpha[i] <- doy
-    doy <- doy - 3 - i/3
+    # how far to offset the next annotation on the clock:
+    # the offset needs to grow as the radius shrinks to make the offsets look similar
+    doy <- doy - 3.2 - i/3
   }
 
 
@@ -214,16 +229,18 @@ plot_doy_bias <- function(fileout, preds_obs_fl, model_id){
       # whether to plot dash:
       if (cnt %% this_alpha$div != 0 & !(doy %in% skip_range)){
         lines((-bias + zer_bias_r) * c(sin(upper_alpha), sin(lower_alpha)), (-bias + zer_bias_r) * c(cos(upper_alpha), cos(lower_alpha)),
-              col = 'grey20')
+              col = 'grey20', lwd = 0.5)
       }
     }
 
   }
 
-  dev.off()
+  par(old_par)
 }
 
-plot_tempbin_bias <- function(fileout, preds_obs_fl, model_id){
+
+
+plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
   # plot temperature bias for 3°C chunks
@@ -248,13 +265,17 @@ plot_tempbin_bias <- function(fileout, preds_obs_fl, model_id){
     filter(n_obs > obs_min)
 
   title_text <- sprintf('%s prediction bias (°C)', get_model_type(model_id))
-  png(file = fileout, width = 4, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(1,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5, xaxs = 'i', yaxs = 'i')
+
+  old_par <- par(mai = c(0.4,0.05,0,0), las = 1, mgp = c(2,.5,0), cex= 1.1, xaxs = 'i', yaxs = 'i')
 
   bias_col <- get_bias_colors()
-  plot(NA, NA, ylim = c(-7.2,5.8), xlim = c(0, 37),
+  plot(NA, NA, ylim = ylim, xlim = c(0, 37),
        xlab = "Water temperature (°C)",
        ylab = title_text, axes = FALSE)
+
+  # add "a)", "b)" etc:
+  add_panel_cue(par('usr'), x_frac = 0.11, y_frac = 0.033, cue_text = panel_text)
+
   # need to plot these as 2°C bins!
   for (bin in unique(plot_data$upper_wtemp_bin)){
     these_data <- plot_data %>% filter(upper_wtemp_bin == bin)
@@ -266,64 +287,14 @@ plot_tempbin_bias <- function(fileout, preds_obs_fl, model_id){
   if (model_id == 'wtemp_ERA5'){
     abline(h = -3.47, lty = 'dashed')
   }
+  par(mgp = c(2,.1,0))
 
-  axis(1, at = seq(0,40, by = 10), las = 1, tck = -0.01)
-  axis(2, at = seq(-10, 10, by = 2), tck = -0.01)
-  dev.off()
-}
+  axis(1, at = c(-10, 0, 36, 100), las = 1, tck = -0.015)
+  par(cex = 0.9, mgp = c(2,0,0))
+  axis(1, at = 17.8, labels = 'Temperature (°C)', las = 1, tck = 0)
+  axis(2, at = seq(-10, 10, by = 2), labels = NA, tck = -0.015)
 
-plot_time_season_accuracy <- function(fileout, preds_obs_fl){
-
-  sesn_cols <- get_cols()
-  plot_data <- read_csv(preds_obs_fl) %>%
-    mutate(doy = lubridate::yday(Date),
-           year = lubridate::year(Date),
-           season = case_when(
-             doy >= 79 & doy < 171 ~ 'spring',
-             doy >= 171 & doy < 265 ~ 'summer',
-             doy >= 265 & doy < 355 ~ 'fall',
-             doy >= 355 | doy < 79 ~ 'winter')
-           ) %>%
-    # was calculating lake/season/year-specific RMSE before, then taking median.
-    #    group_by(season, year, site_id) %>%
-    group_by(season, year) %>%
-    summarize(rmse = rmse(wtemp_ERA5+3.47, wtemp_obs)) %>%
-    #group_by(season, year) %>% summarize(rmse = median(rmse)) %>%
-    mutate(col = case_when(
-      season == 'spring' ~ filter(sesn_cols, season == 'spring')$col,
-      season == 'summer' ~ filter(sesn_cols, season == 'summer')$col,
-      season == 'fall' ~ filter(sesn_cols, season == 'fall')$col,
-      season == 'winter' ~ filter(sesn_cols, season == 'winter')$col
-    ))
-
-  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
-
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(1, 2.8),
-       ylab = "EA-LSTM median lake test RMSE (°C)", xlab = "", axes = FALSE)
-
-  axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
-  axis(2, at = seq(0,10, by = 0.5), las = 1, tck = -0.01)
-
-  y0 <- 1.55
-  x0 <- 2013.5 # midpoint of legend line
-  y_bmp <- 0.07
-  x_wid <- 3.5
-
-  for (var in c('spring', 'summer', 'fall', 'winter')){
-    filter(plot_data, season == var) %>% (function(x){
-      points(x$year, x$rmse, col = x$col, pch = 16, cex = 0.6)
-      lines(x$year, x$rmse, col = x$col[1L], lwd = 2)
-      # add legend here:
-      lines(c(x0-x_wid/2, x0+x_wid/2), c(y0, y0), lwd = 2.5, col = x$col[1L])
-      points(x0, y0, col = x$col, pch = 16, cex = 0.8)
-      # then text:
-      text(x0+x_wid/2, y0, stringr::str_to_sentence(var), pos = 4, offset = 0.55)
-      # bump the y starting point up
-      y0 <<- y0 - y_bmp
-      })
-  }
-  dev.off()
+  par(old_par)
 }
 
 
@@ -683,6 +654,29 @@ plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
     panel_chars <- panel_chars[-1L]
   }
 
+  dev.off()
+
+}
+
+plot_bias_panel <- function(fileout, preds_obs_fl){
+
+  png(file = fileout, width = 7.55, height = 9.1, units = 'in', res = 250)
+  par(omi = c(0,0.05,0.05,0.05), mai = c(0,0,0,0), cex= 1.5, las = 1, xaxs = 'i', yaxs = 'i')
+  panel_chars <- paste0(letters, ')')
+  layout(matrix(c(1,1,2,3,3,
+                  4,4,5,6,6,
+                  7,7,8,9,9), nrow = 3, byrow = TRUE))
+
+  models <- list(wtemp_EALSTM = c(-5.5, 5.5), wtemp_ERA5 = c(-7.5, 3.5),  wtemp_LM = c(-5.5, 5.5))
+  for (model_name in names(models)){
+
+    plot_year_bias(preds_obs_fl, model_name, ylim = models[[model_name]], panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
+    plot_tempbin_bias(preds_obs_fl, model_name, ylim = models[[model_name]], panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
+    plot_doy_bias(preds_obs_fl, model_name, panel_text = panel_chars[1L])
+    panel_chars <- panel_chars[-1L]
+  }
   dev.off()
 
 }
