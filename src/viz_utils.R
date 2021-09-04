@@ -13,7 +13,7 @@ get_model_type <- function(model_id){
   c(wtemp_EALSTM = 'EA-LSTM', wtemp_ERA5 = 'ERA5', wtemp_LM = 'Bachmann LM')[[model_id]]
 }
 
-plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
+plot_year_accuracy <- function(preds_obs_fl, model_id){
   # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
   # plot temperature bias for 3°C chunks
@@ -26,33 +26,26 @@ plot_year_season_bias <- function(fileout, preds_obs_fl, model_id){
   sesn_cols <- get_cols()
   plot_data <- read_csv(preds_obs_fl) %>%
     mutate(doy = lubridate::yday(Date),
-           year = lubridate::year(Date),
-           season = case_when(
-             !is.na(wtemp_LM) ~ 'summer',
-             TRUE ~ 'other')
-    ) %>%
+           year = lubridate::year(Date)) %>%
     # was calculating lake/season/year-specific RMSE before, then taking median.
     #    group_by(season, year, site_id) %>%
-    group_by(season, year) %>%
+    group_by(year) %>%
     summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
                                   ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE)))
 
-  title_text <- sprintf('%s test error (RMSE °C)', get_model_type(model_id))
-  if (model_id == 'wtemp_ERA5'){
-    title_text[1L] <- paste0('*debiased ', title_text[1L])
-  }
 
-  png(file = fileout, width = 10, height = 6, units = 'in', res = 250)
-  par(omi = c(0,0,0.05,0.05), mai = c(0.5,1,0,0), las = 1, mgp = c(2,.5,0), cex = 1.5)
 
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(1.3, 3.1),
-       ylab = title_text,
+  old_par <- par(mai = c(0.2,0.15,0,0.1), las = 1, mgp = c(1.1,0.4,0), cex= 1, xaxs = 'i', yaxs = 'i')
+
+  plot(NA, NA, xlim = c(1979, 2020.5), ylim = c(0.9,3.03 ),
+       ylab = "RMSE (°C)",
        xlab = "", axes = FALSE)
-  filter(plot_data, season == 'summer') %>% {points(.$year, .$rmse, col = 'black', type = 'o', pch = 16, lwd = 2)}
-  filter(plot_data, season == 'other') %>% {points(.$year, .$rmse, col = 'grey40', type = 'o', pch = 22, lty = 'dashed', bg = 'white', lwd = 2)}
-  axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
-  axis(2, at = seq(0,10, by = 0.5), las = 1, tck = -0.01)
-  dev.off()
+
+  plot_data %>% {points(.$year, .$rmse, col = 'black', type = 'o', pch = 16, cex = 0.7)}
+  axis(2, at = seq(-10,10, by = 1), las = 1, tck = -0.02)
+  par(mgp = c(2,.1,0))
+  axis(1, at = seq(1900, 2040, by = 10), tck = -0.02)
+  par(old_par)
 }
 
 
@@ -406,20 +399,16 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     st_transform(plot_proj) %>% st_geometry()
 
   styled_grid <- site_grid %>% left_join(cell_obs, by = 'cell_id')
-  old_par <- par(mai = c(0,0,0,0), xpd = NA)
+  old_par <- par(mai = c(0, 0.2, 0.15, 0.25), xpd = NA)
   plot(usa_sf, col = NA, border = NA, reset = FALSE, setParUsrBB = TRUE)
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, add = TRUE, lwd = 0.25)
   plot(usa_sf, col = NA, border = 'grey80', add = TRUE)
   plot_dims <- par('usr')
-  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
-  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.02
-  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
-  title_text <- c(sprintf('%s', get_model_type(model_id)), 'test error (RMSE °C)')
-  if (model_id == 'wtemp_ERA5'){
-    title_text[1L] <- paste0('*debiased ', title_text[1L])
-  }
+  add_panel_cue(usr = plot_dims, x_frac = 0.02, y_frac = 0.033, cue_text = panel_text, cex = 1.3)
+  par(old_par)
+  old_par <- par(cex = 1.0)
   add_map_legend(plot_dims, bin_breaks, n_cols, col_fun = viridis::inferno, col_fun_dir = 1L,
-                 title = title_text)
+                 title = "", y_frac = 0.13, total_leg_prc = 0.25)
   par(old_par)
 }
 
@@ -486,14 +475,14 @@ plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_tex
 }
 
 
-add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title, total_leg_prc = 0.3){
+add_map_legend <- function(plot_dims, bin_breaks, n_cols, col_fun, col_fun_dir, title, total_leg_prc = 0.3, x_frac = 0.01, y_frac = 0.025){
   bin_w_prc <- total_leg_prc / n_cols
   bin_h_prc <- 0.045
   bin_w <- (plot_dims[2] - plot_dims[1]) * bin_w_prc
   total_leg_w <- (plot_dims[2] - plot_dims[1]) * total_leg_prc
   bin_h <- (plot_dims[4] - plot_dims[3]) * bin_h_prc
-  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.01
-  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * 0.025
+  x0 <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * x_frac
+  y0 <- plot_dims[3] + (plot_dims[4] - plot_dims[3]) * y_frac
   for (i in 1:n_cols){
     # create a square for each color
     this_x0 <- x0+bin_w*(i-1)
@@ -566,10 +555,11 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
     left_join(col_tbl, by = 'bin')
 
   styled_grid <- acc_grid %>% left_join(acc_vals, by = 'cell_id')
-  old_par <- par(mai = c(.34,0.34,0,0), las = 1, mgp = c(1.4,.4,0), xaxs = 'i', yaxs = 'i')
+  old_par <- par(mai = c(0.5, 0.5, 0, 0), las = 1, mgp = c(1.2,0.2,0), xaxs = 'i', yaxs = 'i', cex = 1.0)
+
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, reset = FALSE,
-       ylab = sprintf("%s-predicted surface temperature (°C)", get_model_type(model_id)),
-       xlab = "Observed surface temperature (°C)", axes = FALSE,
+       ylab = sprintf("%s temperature (°C)", get_model_type(model_id)),
+       xlab = "Observed temperature (°C)", axes = FALSE,
        ylim = c(0, 38), xlim = c(0, 38))
   box()
   axis(1, at = seq(0, 40, by = 5), tck = -0.01)
@@ -580,18 +570,17 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
     abline(-3.47,1, lty = "dotted")
   }
   plot_dims <- par('usr')
-  y_panel <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.033
+  add_panel_cue(plot_dims, x_frac = 0.039, y_frac = 0.033, cue_text = panel_text)
+  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.039
   y_rmse <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.073
   y_rmse2 <- plot_dims[4] - (plot_dims[4] - plot_dims[3]) * 0.133
-  x_panel <- plot_dims[1] + (plot_dims[2] - plot_dims[1]) * 0.039
-  text(x = x_panel, y = y_panel, adj = c(0.5, 0.5), panel_text, cex = 1.3)
 
   text(x = x_panel, y = y_rmse, sprintf("RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs),2)), pos = 4)
   if (model_id == "wtemp_ERA5"){
     text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]]+3.47, preds_data$wtemp_obs),2)), pos = 4)
   }
   y_leg_prc <- 0.02 # bottom edge of colors
-  x_leg_prc <- 0.88 # right edge of colors
+  x_leg_prc <- 0.86 # right edge of colors
 
   bin_w_prc <- 0.03
   bin_h_prc <- 0.01
@@ -607,12 +596,12 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
          col = col_fun(n = n_cols, direction = col_fun_dir)[i],
          border = NA)
     if (bin_breaks[i] %in% c(1,10,100,1000)){
-      text(x = x0+bin_w, y = this_y0-bin_h/2, bin_breaks[i], pos = 4, offset = 0.25, cex = 1)
+      text(x = x0+bin_w, y = this_y0-bin_h/2, bin_breaks[i], pos = 4, offset = 0.25, cex = 0.8)
     }
 
   }
 
-  text(x0+bin_w/2, y0, 'Count', pos = 3, cex = 1.2, offset = 0.75)
+  text(x0+bin_w/2, y0, 'Count', pos = 3, cex = 1, offset = 0.75)
   par(old_par)
 }
 
@@ -635,23 +624,45 @@ plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
                                  accuracy_cellsize = 0.5,
                                  space_cellsize = 1,
                                  model_ids){
-  png(file = fileout, width = 7.55, height = 9.1, units = 'in', res = 250)
-  par(omi = c(0,0.05,0.05,0.05), mai = c(0,0,0,0), las = 1, xaxs = 'i', yaxs = 'i')
+  # (fig h - omi[3] - omi[4])/3 needs to be the same as
+  # (fig w - omi[1] - omi[2])* 5 / 11
+  png(file = fileout, width = 7.2, height = 9.85, units = 'in', res = 250)
+  par(omi = c(0,0,0.05,0.05), mai = c(0,0,0,0), las = 1, xaxs = 'i', yaxs = 'i')
   panel_chars <- paste0(letters, ')')
-  layout(matrix(c(1,1,1, 2,2,3,3,3,4,4,5,5,5,6,6), nrow = 3, byrow = TRUE))
+  layout(matrix(c(1, 2,2,2,2,2, 3,3,3,3,3,
+                  1, 2,2,2,2,2, 3,3,3,3,3,
+                  1, 4,4,4,4,4, 3,3,3,3,3,
+
+                  5, 6,6,6,6,6, 7,7,7,7,7,
+                  5, 6,6,6,6,6, 7,7,7,7,7,
+                  5, 8,8,8,8,8, 7,7,7,7,7,
+
+                  9, 10,10,10,10,10, 11,11,11,11,11,
+                  9, 10,10,10,10,10, 11,11,11,11,11,
+                  9, 12,12,12,12,12, 11,11,11,11,11),
+                nrow = 9, byrow = TRUE))
 
   for (j in 1:3){
 
+    title_text <- sprintf('%s test error (RMSE °C)', get_model_type(model_ids[j]))
+    if (model_ids[j] == 'wtemp_ERA5'){
+      title_text <- sprintf('%s test error (*RMSE °C; debiased)', get_model_type(model_ids[j]))
+    }
+
+    plot(1,1, pch = NA, xlim = c(0,1), ylim = c(0,1), axes = FALSE)
+    text(0.65, 0.5, srt = 90, title_text, cex = 1.5)
     plot_spatial_accuracy(metadata_fl, preds_obs_fl,
                           cellsize = space_cellsize,
                           model_id = model_ids[j],
                           panel_text = panel_chars[1L])
+
     panel_chars <- panel_chars[-1L]
     plot_accuracy(preds_obs_fl,
                   cellsize = accuracy_cellsize,
                   model_id = model_ids[j],
                   panel_text = panel_chars[1L])
     panel_chars <- panel_chars[-1L]
+    plot_year_accuracy(preds_obs_fl, model_id = model_ids[j])
   }
 
   dev.off()
@@ -661,7 +672,7 @@ plot_space_raw_panel <- function(fileout, metadata_fl, preds_obs_fl,
 plot_bias_panel <- function(fileout, preds_obs_fl){
 
   png(file = fileout, width = 7.55, height = 9.1, units = 'in', res = 250)
-  par(omi = c(0,0.05,0.05,0.05), mai = c(0,0,0,0), cex= 1.5, las = 1, xaxs = 'i', yaxs = 'i')
+  par(omi = c(0,0 ,0.05,0.05), mai = c(0,0,0,0), cex= 1.5, las = 1, xaxs = 'i', yaxs = 'i')
   panel_chars <- paste0(letters, ')')
   layout(matrix(c(1,1,2,3,3,
                   4,4,5,6,6,

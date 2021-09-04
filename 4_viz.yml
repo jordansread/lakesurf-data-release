@@ -37,47 +37,6 @@ targets:
       preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
       cellsize = 1)
 
-  out_viz/EA-LSTM_year_bias.png:
-    command: plot_year_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_EALSTM'))))
-
-  out_viz/ERA5_year_bias.png:
-    command: plot_year_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_ERA5'))))
-
-  out_viz/LM_year_bias.png:
-    command: plot_year_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_LM'))))
-
-  out_viz/LM_doy_bias.png:
-    command: plot_doy_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_LM'))))
-
-  out_viz/ERA5_doy_bias.png:
-    command: plot_doy_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_ERA5'))))
-
-  out_viz/EA-LSTM_doy_bias.png:
-    command: plot_doy_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_EALSTM'))))
-
-  out_viz/EA-LSTM_tempbin_bias.png:
-    command: plot_tempbin_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_EALSTM'))))
-
-  out_viz/LM_tempbin_bias.png:
-    command: plot_tempbin_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_LM'))))
-
-  out_viz/ERA5_tempbin_bias.png:
-    command: plot_tempbin_bias(target_name,
-      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv',
-      model_id = I(c(I('wtemp_ERA5'))))
+  out_viz/bias_panel.png:
+    command: plot_bias_panel(target_name,
+      preds_obs_fl = 'out_data/lake_surface_temp_preds.csv')
