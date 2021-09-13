@@ -657,7 +657,59 @@ entities:
       data-min: 01
       data-max: 03
       data-units: NA
-
+  -
+    data-name: lake_surface_temp_preds.csv
+    data-description: >-
+      Observed and predicted surface water temperature for 12,227 lakes. Predictions for 306,553 unique lake-days from
+      the EA-LSTM (Willard et al., 2021) model and the ERA5 FLake model (Hersbach et al., 2020) matched to observations.
+      188,886 predictions from the Bachmann et al. (2019) model span the months of June-September (other dates are "NA").
+    attributes:
+    -
+      attr-label: site_id
+      attr-def: >-
+        Lake identification number for this dataset. It is the Prmnn_I from NHD high-res prefixed
+        with source, as "nhdhr_{Prmnn_I}". The ids have a mix of characters and some can include
+        special characters, such as "{" and "}".
+      attr-defs: >-
+        http://nhd.usgs.gov/
+      data-min: NA
+      data-max: NA
+      data-units: NA
+    -
+      attr-label: Date
+      attr-def: date of prediction or observation
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: Date
+    -
+      attr-label: wtemp_EALSTM
+      attr-def: Predicted surface temperature from the EA-LSTM model (Willard et al., 2021; Kratzert et al., 2019)
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: wtemp_LM
+      attr-def: Predicted surface temperature from the Bachmann linear model (Bachmann et al., 2019)
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: wtemp_ERA5
+      attr-def: Predicted surface temperature from the ERA5 FLake model (Hersbach et al., 2020)
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: wtemp_obs
+      attr-def: Observed surface temperature (Willard et al., 2021)
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
 
 purpose: Fisheries biology, limnological research, and climate science.
 start-date: 19800101
