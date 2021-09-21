@@ -412,6 +412,27 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
     left_join(col_tbl, by = 'bin')
 
+  st_transform(sites_sf, plot_proj) %>%
+    st_intersection(site_grid, .) %>%
+    st_drop_geometry() %>% select(cell_id, site_id) %>%
+    right_join(pred_obs, by = 'site_id') %>%
+    group_by(cell_id) %>%
+    # debiasing!!
+    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+              RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
+              RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+              RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
+              .groups = 'drop',
+              n = sum(!is.na(wtemp_obs))) %>%
+    filter(n >= min_obs) %>%
+    mutate(is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
+           is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
+    summarize(n_best_raw = sum(is_best_raw),
+              prc_best_raw = sum(is_best_raw) / length(is_best_raw),
+              n_best_deb = sum(is_best_deb),
+              prc_best_deb = sum(is_best_deb) / length(is_best_raw),
+              n_tot = length(is_best_raw))
+
   usa_sf <- sf::st_transform(spData::us_states, crs = 4326) %>%
     st_as_sf() %>%
     st_transform(plot_proj) %>% st_geometry()

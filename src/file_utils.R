@@ -20,10 +20,43 @@ convert_preds_tibble <- function(filein){
            wtemp_obs = wtemp_actual)
 }
 
+# in text info:
+# compare specific lakes
+# read_csv('out_data/lake_surface_temp_preds.csv') %>%
+#   group_by(site_id) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
+#             .groups = 'drop') %>%
+#   mutate(RMSE_LM = ifelse(is.na(RMSE_LM), 99, RMSE_LM),
+#          is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
+#          is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
+#   summarize(n_best_raw = sum(is_best_raw),
+#             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
+#             n_best_deb = sum(is_best_deb),
+#             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
+
+# compare specific years:
+# read_csv('out_data/lake_surface_temp_preds.csv') %>%
+#   mutate(year = lubridate::year(Date)) %>%
+#   group_by(year) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
+#             .groups = 'drop') %>%
+#   mutate(is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
+#          is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
+#   summarize(n_best_raw = sum(is_best_raw),
+#             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
+#             n_best_deb = sum(is_best_deb),
+#             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
+
+
 match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
   # create a grid for the ERA5 data, which is gridded on a 0.25° lat/lon grid. Will use this to match lakes to the grid
   era5_grid <- sf_grid_nc(nc_fl)
-
   # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
   expver <- 1
   # add a row column so we know how to reassemble
@@ -35,6 +68,12 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
   # assign netcdf cell indices to each lake in the dataset,
   # which happens below when we use obs_pred[replace_data$row_num, ] <- replace_data
   era_cell_indices <- feature_cell_indices(cell_grid = era5_grid, lake_pts)
+
+  # to get the count of unique ERA5 cells that have observations, use this:
+  # era_cell_indices %>% group_by(x, y) %>% filter(row_number(site_id) == 1) %>% nrow()
+
+  # to get the count of unique ERA5 cells that have _lakes_ in this dataset, use this:
+  # feature_cell_indices(cell_grid = era5_grid, centroids_sf) %>% group_by(x, y) %>% filter(row_number(site_id) == 1) %>% nrow()
 
   nc <- ncdf4::nc_open(nc_fl)
 
