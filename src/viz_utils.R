@@ -1,4 +1,8 @@
 
+get_era5_bias <- function(){
+  -3.31
+}
+
 get_cols <- function(){
   tibble(
     col = RColorBrewer::brewer.pal(n = 4, name = 'Set2'),
@@ -27,14 +31,14 @@ plot_year_accuracy <- function(preds_obs_fl, model_id, panel_text){
   bin_breaks <- c(0, seq(1, 4.15, by = 0.05), 20)
   col_tbl <- get_rmse_col_tbl(bin_breaks)
 
-  plot_data <- read_csv(preds_obs_fl) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date)) %>%
     # was calculating lake/season/year-specific RMSE before, then taking median.
     #    group_by(season, year, site_id) %>%
     group_by(year) %>%
-    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
-                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE))) %>%
+    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs -
+                                  ifelse(model_id == 'wtemp_ERA5', get_era5_bias(), 0))^2, na.rm=TRUE))) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = FALSE)) %>%
     left_join(col_tbl, by = 'bin')
 
@@ -42,7 +46,7 @@ plot_year_accuracy <- function(preds_obs_fl, model_id, panel_text){
 
   old_par <- par(mai = c(0.2,0.15,0,0.1), las = 1, mgp = c(1.1,0.15,0), cex= 1, xaxs = 'i', yaxs = 'i')
 
-  plot(NA, NA, xlim = c(1979, 2020.5), ylim = c(1.30,3.0 ),
+  plot(NA, NA, xlim = c(1979.4, 2020.5), ylim = c(1.30,3.0 ),
        ylab = "RMSE (°C)",
        xlab = "", axes = FALSE)
   add_panel_cue(par('usr'), x_frac = 0.04, y_frac = 0.033, cue_text = panel_text)
@@ -60,7 +64,7 @@ plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
   # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
   # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
-  plot_data <- read_csv(preds_obs_fl) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date)) %>%
     # was calculating lake/season/year-specific RMSE before, then taking median.
@@ -89,7 +93,7 @@ plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.47, lty = 'dashed')
+    abline(h = get_era5_bias(), lty = 'dashed')
   }
 
   axis(2, at = seq(-10,10, by = 2), las = 1, tck = -0.01)
@@ -127,7 +131,7 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   bin_w <- 3
   # make sure the last bin is inclusive of leap year
   bin_breaks <- c(seq(low_bin, high_bin - bin_w, by = bin_w), high_bin + 10)
-  plot_data <- read_csv(preds_obs_fl) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     mutate(doy = lubridate::yday(Date),
            upper_doy_bin = cut(doy, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
     # PROBABLY want to combine DOY 366 with 365 samples
@@ -258,7 +262,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   bin_w <- 2
   obs_min <- 100 # minimum number of obs in a bin for plotting
   bin_breaks <- seq(low_bin, high_bin, by = bin_w)
-  plot_data <- read_csv(preds_obs_fl) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     filter(wtemp_obs >= low_bin & wtemp_obs < high_bin) %>%
     mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
     group_by(upper_wtemp_bin) %>%
@@ -287,7 +291,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.47, lty = 'dashed')
+    abline(h = get_era5_bias(), lty = 'dashed')
   }
   par(mgp = c(2,.1,0))
 
@@ -306,7 +310,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
 plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
 
   sesn_cols <- get_cols()
-  plot_data <- read_csv(preds_obs_fl) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date),
            season = case_when(
@@ -325,7 +329,7 @@ plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
 
   old_par <- par(mai = c(0.24, 0.44, 0, 0.1), las = 1, mgp = c(2, 0.4, 0))
 
-  plot(NA, NA, xlim = c(1980, 2020), ylim = c(0, 17000),
+  plot(NA, NA, xlim = c(1979.5, 2020.5), ylim = c(0, 17000),
        ylab = "Surface temperature observations (#)", xlab = "", axes = FALSE)
 
   axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
@@ -406,7 +410,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     group_by(cell_id) %>%
     # debiasing!!
     summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs -
-                                  ifelse(model_id == 'wtemp_ERA5', -3.47, 0))^2, na.rm=TRUE)),
+                                  ifelse(model_id == 'wtemp_ERA5', get_era5_bias(), 0))^2, na.rm=TRUE)),
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
@@ -418,13 +422,14 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
     # debiasing!!
-    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 - wtemp_obs -3.47)^2, na.rm = TRUE)),
+    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 - wtemp_obs - get_era5_bias())^2, na.rm = TRUE)),
               RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
               .groups = 'drop',
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
+    # TAKE a look at this to see how it ranked:
     mutate(is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
            is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
     summarize(n_best_raw = sum(is_best_raw),
@@ -602,14 +607,14 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
   plot(st_geometry(styled_grid), col = styled_grid$col, border = styled_grid$col, reset = FALSE,
        ylab = sprintf("%s temperature (°C)", get_model_type(model_id)),
        xlab = "Observed temperature (°C)", axes = FALSE,
-       ylim = c(0, 38), xlim = c(0, 38))
+       ylim = c(0, 39.2), xlim = c(0, 39.2))
   box()
   axis(1, at = seq(0, 40, by = 5), tck = -0.01)
   axis(2, at = seq(0, 40, by = 5), las = 1, tck = -0.01)
   abline(0,1, col = 'grey30', lwd = 0.5)
   abline(0,1, lty = 'dashed')
   if (model_id == "wtemp_ERA5"){
-    abline(-3.47,1, lty = "dotted")
+    abline(get_era5_bias(), 1, lty = "dotted")
   }
   plot_dims <- par('usr')
   add_panel_cue(plot_dims, x_frac = 0.039, y_frac = 0.033, cue_text = panel_text)
@@ -619,7 +624,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
   text(x = x_panel, y = y_rmse, sprintf("RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs),2)), pos = 4)
   if (model_id == "wtemp_ERA5"){
-    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs-3.47),2)), pos = 4)
+    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs+ get_era5_bias()),2)), pos = 4)
   }
   y_leg_prc <- 0.02 # bottom edge of colors
   x_leg_prc <- 0.86 # right edge of colors
