@@ -1,5 +1,5 @@
 title: >-
-  Data release: Daily surface temperatures for 185,000 lakes in the Contiguous United States estimated using deep learning (1980-2020)
+  Data release: Daily surface temperatures for 185,549 lakes in the Contiguous United States estimated using deep learning (1980-2020)
 
 
 abstract: >-
@@ -11,7 +11,7 @@ abstract: >-
   applications including estimations of thermal habitats and the impacts of climate change on inland lakes.
 
 authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen","Vipin Kumar"]
-pubdate: 2021 # replace with actual year, e.g., 2020
+pubdate: 2022 # replace with actual year, e.g., 2020
 doi: https://doi.org/10.5066/P9CEMS0M
 
 build-environment: Multiple computer systems were used to generate these data, including linux, OSX. The open source languages R and Python were used on all systems.
@@ -21,8 +21,8 @@ larger-cites:
   -
     authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen", "Vipin Kumar"]
     title: >-
-      Deep learning estimates and observations of lake surface temperatures (1980-2020) for the Continental U.S.
-    pubdate: 2021
+      Daily surface temperatures for 185,549 lakes in the Conterminous United States estimated using deep learning (1980-2020)
+    pubdate: 2022
     form: publication
 cross-cites:
   -
@@ -74,7 +74,7 @@ cross-cites:
     link: https://doi.org/10.1002/qj.3803
 
 process-date: !expr format(Sys.time(),'%Y%m%d')
-file-format: a single comma-delimited file and a single zipped shapefile
+file-format: Two comma-delimited files and six NetCDF files
 
 entities:
   -
@@ -97,7 +97,7 @@ entities:
       attr-label: surftemp
       attr-def: Predicted daily lake surface temperature from the entity-aware long short term memory (EA-LSTM) network model
       attr-defs: >-
-        This release; Willard et al., 2021; Kratzert et al., 2019
+        This release; Willard et al., 2022; Kratzert et al., 2019
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -157,7 +157,7 @@ entities:
       attr-label: surftemp
       attr-def: Predicted daily lake surface temperature from the entity-aware long short term memory (EA-LSTM) network model
       attr-defs: >-
-        This release; Willard et al., 2021; Kratzert et al., 2019
+        This release; Willard et al., 2022; Kratzert et al., 2019
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -217,7 +217,7 @@ entities:
       attr-label: surftemp
       attr-def: Predicted daily lake surface temperature from the entity-aware long short term memory (EA-LSTM) network model
       attr-defs: >-
-        This release; Willard et al., 2021; Kratzert et al., 2019
+        This release; Willard et al., 2022; Kratzert et al., 2019
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -594,7 +594,7 @@ entities:
         Root-mean square error (RMSE; in degrees C) of the entity-aware long short term memory (EA-LSTM) surface water temperature predictions.
         RMSE is estimated from performance using cross-fold validation.
       attr-defs: >-
-        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2022
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -607,7 +607,7 @@ entities:
         observations included in this data release. Contrary to other RMSE values reported here, these lake-specific
         estimates of model performance were calculated with data only from June-September.
       attr-defs: >-
-        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Bachmann et al., 2019
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2022; Bachmann et al., 2019
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -617,7 +617,7 @@ entities:
         Root-mean square error (RMSE; in degrees C) of the surface mixed-layer of the noon UTC-5 grid-representation of lakes
         in the ERA5 global reanalysis which used the FLake parametrization for lake simulations.
       attr-defs: >-
-        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2021; Hersbach et al., 2020
+        https://en.wikipedia.org/wiki/Root-mean-square_deviation; Willard et al., 2022; Hersbach et al., 2020
       data-min: NA
       data-max: NA
       data-units: degrees C
@@ -626,7 +626,7 @@ entities:
       attr-def: >-
         Numeric identifier for which of the 16 k-means clusters of lakes based on latitude, longitude, and surface area.
       attr-defs: >-
-        Willard et al., 2021
+        Willard et al., 2022
       data-min: 1
       data-max: 16
       data-units: NA
@@ -635,7 +635,7 @@ entities:
       attr-def: >-
         Numeric identifier for which of the 5 equal groups of lakes used for nested cross validation. Each cluster (cluster_id) of lakes is equally divided among the 5 fold_ids.
       attr-defs: >-
-        Willard et al., 2021
+        Willard et al., 2022
       data-min: 1
       data-max: 5
       data-units: NA
@@ -644,7 +644,7 @@ entities:
       attr-def: >-
         The latitude and longitude range that this lake fits into. Used for determining file pattern for associated "prediction" or "weather" NetCDF files.
       attr-defs: >-
-        Willard et al., 2021
+        Willard et al., 2022
       data-min: NA
       data-max: NA
       data-units: NA
@@ -653,16 +653,17 @@ entities:
       attr-def: >-
         The the two digit group this lake fits into. Used for determining file pattern for associated "prediction" or "weather" NetCDF files.
       attr-defs: >-
-        Willard et al., 2021
+        Willard et al., 2022
       data-min: 01
       data-max: 03
       data-units: NA
   -
-    data-name: lake_surface_temp_preds.csv
+    data-name: lake_surface_temp_obs_preds.csv
     data-description: >-
       Observed and predicted surface water temperature for 12,227 lakes. Predictions for 306,553 unique lake-days from
-      the EA-LSTM (Willard et al., 2021) model and the ERA5 FLake model (Hersbach et al., 2020) matched to observations.
-      188,886 predictions from the Bachmann et al. (2019) model span the months of June-September (other dates are "NA").
+      the EA-LSTM (Willard et al., 2021) model and 303,579 from the ERA5 FLake model (Hersbach et al., 2020) matched to observations
+      (ERA5 FLake outputs for 70 near-coastal lakes are "NA"). 188,886 predictions from the Bachmann et al. (2019) model
+      span the months of June-September (other dates are "NA").
     attributes:
     -
       attr-label: site_id
@@ -705,11 +706,19 @@ entities:
       data-units: degrees C
     -
       attr-label: wtemp_obs
-      attr-def: Observed surface temperature (Willard et al., 2021)
+      attr-def: Observed surface temperature (Willard et al., 2022)
       attr-defs: NA
       data-min: NA
       data-max: NA
       data-units: degrees C
+    -
+      attr-label: obs_data_source
+      attr-def: Data source name from monitoring group (Willard et al., 2022)
+      attr-defs: >-
+        Data source name from monitoring group; "unresolved" used when missing.
+      data-min: NA
+      data-max: NA
+      data-units: NA
 
 purpose: Fisheries biology, limnological research, and climate science.
 start-date: 19800101
