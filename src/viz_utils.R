@@ -89,7 +89,7 @@ plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.47, lty = 'dashed')
+    abline(h = -3.314, lty = 'dashed')
   }
 
   axis(2, at = seq(-10,10, by = 2), las = 1, tck = -0.01)
@@ -287,7 +287,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.47, lty = 'dashed')
+    abline(h = -3.314, lty = 'dashed')
   }
   par(mgp = c(2,.1,0))
 
@@ -326,7 +326,7 @@ plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
   old_par <- par(mai = c(0.24, 0.44, 0, 0.1), las = 1, mgp = c(2, 0.4, 0))
 
   plot(NA, NA, xlim = c(1980, 2020), ylim = c(0, 17000),
-       ylab = "Suface temperature observations (#)", xlab = "", axes = FALSE)
+       ylab = "Surface temperature observations (#)", xlab = "", axes = FALSE)
 
   axis(1, at = seq(1970, 2030, by = 5), tck = -0.01)
   axis(2, at = seq(-5000, 20000, by = 5000), labels = paste(seq(-5, 20, by = 5), 'k', sep = ''), las = 1, tck = -0.01)
@@ -405,8 +405,8 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
     # debiasing!!
-    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs +
-                                  ifelse(model_id == 'wtemp_ERA5', 3.47, 0))^2, na.rm=TRUE)),
+    summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs -
+                                  ifelse(model_id == 'wtemp_ERA5', -3.314, 0))^2, na.rm=TRUE)),
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
@@ -418,7 +418,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
     # debiasing!!
-    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 - wtemp_obs -3.314)^2, na.rm = TRUE)),
               RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
@@ -508,13 +508,15 @@ plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_tex
   add_map_legend(plot_dims, bin_breaks,
                  col_fun = viridis::mako, col_fun_dir = -1L,
                  title = 'Number of observed lakes (#)',
-                 total_leg_prc = 0.42)
+                 leg_title_cex = 1.15,
+                 x_frac = 0,
+                 total_leg_prc = 0.4)
 
   par(old_par)
 }
 
 
-add_map_legend <- function(plot_dims, bin_breaks, col_fun, col_fun_dir, title, total_leg_prc = 0.3, x_frac = 0.01, y_frac = 0.025){
+add_map_legend <- function(plot_dims, bin_breaks, col_fun, col_fun_dir, title, total_leg_prc = 0.3, x_frac = 0.01, y_frac = 0.025, leg_title_cex = 1.2){
   n_cols = length(bin_breaks)-1
   bin_w_prc <- total_leg_prc / n_cols
   bin_h_prc <- 0.045
@@ -538,7 +540,7 @@ add_map_legend <- function(plot_dims, bin_breaks, col_fun, col_fun_dir, title, t
         text(x = this_x0 + bin_w/2, y = y0+bin_h, paste0(bin_breaks[i],'+'), pos = 3, offset = 0.25, cex = 1)
       } else {
         text_str <- sprintf('%s-%s', bin_breaks[i], bin_breaks[i+1]-1)
-        text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.25, cex = 0.85)
+        text(x = this_x0 + bin_w/2, y = y0+bin_h, text_str, pos = 3, offset = 0.25, cex = 0.83)
       }
     } else {
       if (bin_breaks[i] %% 1 == 0 && bin_breaks[i] != 0){
@@ -546,9 +548,9 @@ add_map_legend <- function(plot_dims, bin_breaks, col_fun, col_fun_dir, title, t
       }
     }
   }
-  text(x = x0, y = y0+bin_h *2.3, tail(title, 1L), pos = 4, offset = 0, cex = 1.2)
+  text(x = x0, y = y0+bin_h *2.3, tail(title, 1L), pos = 4, offset = 0, cex = leg_title_cex)
   if (length(title) == 2){
-    text(x = x0, y = y0+bin_h * 3.3, title[1L], pos = 4, offset = 0, cex = 1.2)
+    text(x = x0, y = y0+bin_h * 3.3, title[1L], pos = 4, offset = 0, cex = leg_title_cex)
   }
 
 
@@ -607,7 +609,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
   abline(0,1, col = 'grey30', lwd = 0.5)
   abline(0,1, lty = 'dashed')
   if (model_id == "wtemp_ERA5"){
-    abline(-3.47,1, lty = "dotted")
+    abline(-3.314,1, lty = "dotted")
   }
   plot_dims <- par('usr')
   add_panel_cue(plot_dims, x_frac = 0.039, y_frac = 0.033, cue_text = panel_text)
@@ -617,7 +619,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
   text(x = x_panel, y = y_rmse, sprintf("RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs),2)), pos = 4)
   if (model_id == "wtemp_ERA5"){
-    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]]+3.47, preds_data$wtemp_obs),2)), pos = 4)
+    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs-3.314),2)), pos = 4)
   }
   y_leg_prc <- 0.02 # bottom edge of colors
   x_leg_prc <- 0.86 # right edge of colors

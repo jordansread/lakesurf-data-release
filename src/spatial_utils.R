@@ -14,7 +14,7 @@ fetch_zip_url_sf <- function(zip_url, layer_name){
 
 }
 
-sf_grid_nc <- function(nc_file){
+sf_grid_nc <- function(nc_file, cell_res){
   nc <- ncdf4::nc_open(nc_file)
 
   lon <- ncdf4::ncvar_get(nc, 'longitude')
@@ -25,9 +25,13 @@ sf_grid_nc <- function(nc_file){
   x0 <- lon[1]
   y0 <- tail(lat, 1)
 
-  cell_res <- unique(diff(lon)) # is the same for both
+  if (missing(cell_res)){
+    cell_res <- unique(diff(lon)) # is the same for both
+    stopifnot(cell_res == unique(-diff(lat)))
+  }
 
-  stopifnot(cell_res == unique(-diff(lat)))
+
+
 
   x_num <- length(lon)
   y_num <- length(lat)

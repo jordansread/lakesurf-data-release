@@ -54,11 +54,35 @@ convert_preds_tibble <- function(filein){
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
 
 
-match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
-  # create a grid for the ERA5 data, which is gridded on a 0.25° lat/lon grid. Will use this to match lakes to the grid
-  era5_grid <- sf_grid_nc(nc_fl)
+add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
+
+  obs_all <- read_csv(source_fl, show_col_types = FALSE) %>%
+    # we don't use this information, but I verified it was identical to the other file
+    # max difference of 1.831055e-06°C
+    select(-wtemp_obs)
+
+  wqp_orgs <- filter(obs_all, !str_detect(source, 'ALABAMACOUSHATTATRIBE.TX_WQX') & !str_detect(source, '.rds')) %>%
+    select(Date, site_id, source) %>% pull(source) %>% unique() %>%
+    dataRetrieval::whatWQPsites(siteid = .) %>%
+    select(data_source = OrganizationFormalName, source = MonitoringLocationIdentifier)
+
+
+  read_csv(obs_pred_fl, show_col_types = FALSE) %>%
+    # obs_pred is a subset of source/obs_all, since the latter doesn't have the ERA5-based QAQC
+    left_join(obs_all, by = c('Date','site_id')) %>%
+    left_join(wqp_orgs, by = 'source') %>%
+    mutate(data_source = replace_na(data_source, 'unknown')) %>%
+    select(site_id, Date, wtemp_EALSTM, wtemp_LM, wtemp_ERA5, wtemp_obs, data_source) %>%
+    write_csv(file = fileout)
+
+}
+
+match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf, cell_res){
+  # create a grid for the ERA5 data, which is gridded on a 0.25° or 0.1° lat/lon grid. Will use this to match lakes to the grid
+  era5_grid <- sf_grid_nc(nc_fl, cell_res = cell_res)
   # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
-  expver <- 1
+
+  # expver <- 1 #not used in 0.1° ERA5
   # add a row column so we know how to reassemble
   obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
                      wtemp_ERA5 = NA_real_)
@@ -78,6 +102,7 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
   nc <- ncdf4::nc_open(nc_fl)
 
   # relies on this file having units "hours since 1900-01-01 00:00:00.0"
+  # verified this is the case for ERA5 0.25° and 0.1° data
   nc_time <- as.character(as.Date('1900-01-01') + ncdf4::ncvar_get(nc, 'time')/24)
 
   un_indices <- select(era_cell_indices, -site_id) %>% filter(!duplicated(.))
@@ -93,8 +118,8 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf){
     replace_data <- tibble(Date = nc_time,
                            wtemp_ERA5 = ncdf4::ncvar_get(
              nc, 'lmlt',
-             start = c(this_x, this_y, expver, 1L),
-             count = c(1L, 1L, 1L, -1L))- 273.15) %>%
+             start = c(this_x, this_y, 1L),
+             count = c(1L, 1L, -1L))- 273.15) %>%
       left_join(these_data, ., by = "Date")
     obs_pred[replace_data$row_num, ] <- replace_data
 
