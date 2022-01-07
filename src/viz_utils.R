@@ -89,7 +89,7 @@ plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.314, lty = 'dashed')
+    abline(h = -3.47, lty = 'dashed')
   }
 
   axis(2, at = seq(-10,10, by = 2), las = 1, tck = -0.01)
@@ -287,7 +287,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   }
   abline(h = 0)
   if (model_id == 'wtemp_ERA5'){
-    abline(h = -3.314, lty = 'dashed')
+    abline(h = -3.47, lty = 'dashed')
   }
   par(mgp = c(2,.1,0))
 
@@ -406,7 +406,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     group_by(cell_id) %>%
     # debiasing!!
     summarize(rmse = sqrt(mean((!!rlang::sym(model_id) - wtemp_obs -
-                                  ifelse(model_id == 'wtemp_ERA5', -3.314, 0))^2, na.rm=TRUE)),
+                                  ifelse(model_id == 'wtemp_ERA5', -3.47, 0))^2, na.rm=TRUE)),
               n = sum(!is.na(wtemp_obs))) %>%
     filter(n >= min_obs) %>%
     mutate(bin = cut(rmse, breaks = bin_breaks, right = F)) %>%
@@ -418,7 +418,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
     right_join(pred_obs, by = 'site_id') %>%
     group_by(cell_id) %>%
     # debiasing!!
-    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 - wtemp_obs -3.314)^2, na.rm = TRUE)),
+    summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 - wtemp_obs -3.47)^2, na.rm = TRUE)),
               RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
               RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
@@ -609,7 +609,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
   abline(0,1, col = 'grey30', lwd = 0.5)
   abline(0,1, lty = 'dashed')
   if (model_id == "wtemp_ERA5"){
-    abline(-3.314,1, lty = "dotted")
+    abline(-3.47,1, lty = "dotted")
   }
   plot_dims <- par('usr')
   add_panel_cue(plot_dims, x_frac = 0.039, y_frac = 0.033, cue_text = panel_text)
@@ -619,7 +619,7 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
   text(x = x_panel, y = y_rmse, sprintf("RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs),2)), pos = 4)
   if (model_id == "wtemp_ERA5"){
-    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs-3.314),2)), pos = 4)
+    text(x = x_panel, y = y_rmse2, sprintf("*RMSE: %s", round(rmse(preds_data[[model_id]], preds_data$wtemp_obs-3.47),2)), pos = 4)
   }
   y_leg_prc <- 0.02 # bottom edge of colors
   x_leg_prc <- 0.86 # right edge of colors

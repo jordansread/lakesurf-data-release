@@ -34,10 +34,15 @@ targets:
 
  # ERA5 data from https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels
  # UTC 5PM to be an approx noon for US central location
-  out_data/lake_surface_temp_preds.csv:
+  out_data/obs_pred.csv:
     command: match_era5_grid2obs(target_name, obs_pred = lake_surface_temp_preds,
       nc_fl = 'in_data/adaptor.mars.internal-1626051448.311538-8171-10-ef8eacb9-0624-4bde-8708-6f230b785a44.nc',
       centroids_sf = modeled_centroids_sf)
+
+  out_data/lake_surface_temp_preds.csv:
+    command: add_source_info_obs(target_name,
+      obs_pred_fl = 'out_data/obs_pred.csv',
+      source_fl = 'out_data/lake_surface_temp_obs.csv')
 
   out_data/lake_surface_temp_obs.csv:
     command: convert_feather_file(target_name, feather_fl = 'in_data/surface_lake_temp_daily.feather')

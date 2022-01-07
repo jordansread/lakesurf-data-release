@@ -82,7 +82,7 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf, cell_res
   era5_grid <- sf_grid_nc(nc_fl, cell_res = cell_res)
   # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
 
-  # expver <- 1 #not used in 0.1° ERA5
+  expver <- 1 #not used in 0.1° ERA5
   # add a row column so we know how to reassemble
   obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
                      wtemp_ERA5 = NA_real_)
@@ -118,8 +118,8 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf, cell_res
     replace_data <- tibble(Date = nc_time,
                            wtemp_ERA5 = ncdf4::ncvar_get(
              nc, 'lmlt',
-             start = c(this_x, this_y, 1L),
-             count = c(1L, 1L, -1L))- 273.15) %>%
+             start = c(this_x, this_y, expver, 1L),
+             count = c(1L, 1L, 1L, -1L))- 273.15) %>%
       left_join(these_data, ., by = "Date")
     obs_pred[replace_data$row_num, ] <- replace_data
 
