@@ -24,24 +24,27 @@ convert_preds_tibble <- function(filein){
 # compare specific lakes
 # read_csv('out_data/lake_surface_temp_preds.csv') %>%
 #   group_by(site_id) %>%
-#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
 #             .groups = 'drop') %>%
 #   mutate(RMSE_LM = ifelse(is.na(RMSE_LM), 99, RMSE_LM),
+#          RMSE_ERA5 = ifelse(is.na(RMSE_ERA5), 99, RMSE_ERA5),
+#          `*RMSE_ERA5` = ifelse(is.na(`*RMSE_ERA5`), 99, `*RMSE_ERA5`),
 #          is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
 #          is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
 #   summarize(n_best_raw = sum(is_best_raw),
 #             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
 #             n_best_deb = sum(is_best_deb),
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
-
+# for SPATIAL CELLS, see viz_utils, `plot_spatial_accuracy()`
+# for ERA5 CELL COUNT, see
 # compare specific years:
 # read_csv('out_data/lake_surface_temp_preds.csv') %>%
 #   mutate(year = lubridate::year(Date)) %>%
 #   group_by(year) %>%
-#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.47 - wtemp_obs)^2, na.rm = TRUE)),
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
@@ -52,7 +55,17 @@ convert_preds_tibble <- function(filein){
 #             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
 #             n_best_deb = sum(is_best_deb),
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
-
+# Compare median lake-specific rmse:
+# read_csv('out_data/lake_surface_temp_preds.csv') %>% group_by(site_id) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
+#     RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
+#             .groups = 'drop') %>% ungroup() %>%
+#   summarize(`*med_RMSE_ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
+#     med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
+#             med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
+#             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE))
 
 add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
 
@@ -64,15 +77,15 @@ add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
   wqp_orgs <- filter(obs_all, !str_detect(source, 'ALABAMACOUSHATTATRIBE.TX_WQX') & !str_detect(source, '.rds')) %>%
     select(Date, site_id, source) %>% pull(source) %>% unique() %>%
     dataRetrieval::whatWQPsites(siteid = .) %>%
-    select(data_source = OrganizationFormalName, source = MonitoringLocationIdentifier)
+    select(obs_data_source = OrganizationFormalName, source = MonitoringLocationIdentifier)
 
 
   read_csv(obs_pred_fl, show_col_types = FALSE) %>%
     # obs_pred is a subset of source/obs_all, since the latter doesn't have the ERA5-based QAQC
     left_join(obs_all, by = c('Date','site_id')) %>%
     left_join(wqp_orgs, by = 'source') %>%
-    mutate(data_source = replace_na(data_source, 'unknown')) %>%
-    select(site_id, Date, wtemp_EALSTM, wtemp_LM, wtemp_ERA5, wtemp_obs, data_source) %>%
+    mutate(obs_data_source = replace_na(obs_data_source, 'unresolved')) %>%
+    select(site_id, Date, wtemp_EALSTM, wtemp_LM, wtemp_ERA5, wtemp_obs, obs_data_source) %>%
     write_csv(file = fileout)
 
 }
@@ -82,7 +95,7 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf, cell_res
   era5_grid <- sf_grid_nc(nc_fl, cell_res = cell_res)
   # see https://confluence.ecmwf.int/pages/viewpage.action?pageId=173385064 for info on this dimension
 
-  expver <- 1 #not used in 0.1° ERA5
+  #expver <- 1 #not used in 0.1° ERA5
   # add a row column so we know how to reassemble
   obs_pred <- mutate(obs_pred, Date = as.character(Date), row_num = row_number(),
                      wtemp_ERA5 = NA_real_)
@@ -118,8 +131,8 @@ match_era5_grid2obs <- function(fileout, obs_pred, nc_fl, centroids_sf, cell_res
     replace_data <- tibble(Date = nc_time,
                            wtemp_ERA5 = ncdf4::ncvar_get(
              nc, 'lmlt',
-             start = c(this_x, this_y, expver, 1L),
-             count = c(1L, 1L, 1L, -1L))- 273.15) %>%
+             start = c(this_x, this_y, 1L),
+             count = c(1L, 1L, -1L))- 273.15) %>%
       left_join(these_data, ., by = "Date")
     obs_pred[replace_data$row_num, ] <- replace_data
 
