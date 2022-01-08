@@ -22,7 +22,7 @@ convert_preds_tibble <- function(filein){
 
 # in text info:
 # compare specific lakes
-# read_csv('out_data/lake_surface_temp_preds.csv') %>%
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
 #   group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
@@ -41,14 +41,14 @@ convert_preds_tibble <- function(filein){
 # for SPATIAL CELLS, see viz_utils, `plot_spatial_accuracy()`
 # for ERA5 CELL COUNT, see
 # compare specific years:
-# read_csv('out_data/lake_surface_temp_preds.csv') %>%
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
 #   mutate(year = lubridate::year(Date)) %>%
 #   group_by(year) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
-#             .groups = 'drop') %>%
+#             .groups = 'drop') %>% # use {pull(`*RMSE_ERA5`) %>% range} to get model yearly RMSE range
 #   mutate(is_best_raw = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= RMSE_ERA5,
 #          is_best_deb = RMSE_EALSTM <= RMSE_LM & RMSE_EALSTM <= `*RMSE_ERA5`) %>%
 #   summarize(n_best_raw = sum(is_best_raw),
@@ -56,16 +56,82 @@ convert_preds_tibble <- function(filein){
 #             n_best_deb = sum(is_best_deb),
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
 # Compare median lake-specific rmse:
-# read_csv('out_data/lake_surface_temp_preds.csv') %>% group_by(site_id) %>%
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>% group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #     RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
 #             .groups = 'drop') %>% ungroup() %>%
-#   summarize(`*med_RMSE_ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
-#     med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
+#   summarize(`med_RMSE_*ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
+#             `low_RMSE_*ERA` = quantile(`*RMSE_ERA5`, 0.25, na.rm = TRUE),
+#             `high_RMSE_*ERA` = quantile(`*RMSE_ERA5`, 0.75, na.rm = TRUE),
+#             med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
+#             `low_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.25, na.rm = TRUE),
+#             `high_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.75, na.rm = TRUE),
 #             med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
 #             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE))
+# compare lake-size classes:
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>% group_by(site_id) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
+#             .groups = 'drop') %>% ungroup() %>%
+#   left_join(read_csv('out_data/lake_metadata.csv'), by = "site_id") %>%
+#   filter(!is.na(RMSE_EALSTM)) %>%
+#   mutate(area_bin = cut( area_m2, breaks = c(0,100000, 1e+6, 1e+7, 1e20) , right = FALSE)) %>%
+#   group_by(area_bin) %>%
+#     summarize(`*med_RMSE_ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
+#       med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
+#               med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
+#               med_RMSE_LM = median(RMSE_LM, na.rm = TRUE))
+# compare temp bin biases:
+# read_csv('out_data/lake_surface_temp_preds.csv') %>%
+#   mutate(temp_bin = cut( wtemp_obs, breaks = c(0, 10, 20, 30, 1000) , right = F, include.lowest = TRUE)) %>%
+#   group_by(temp_bin) %>%
+#   summarize(
+#     bias_ERA5 = median(wtemp_ERA5 - wtemp_obs, na.rm = TRUE),
+#     bias_LM = median(wtemp_LM - wtemp_obs, na.rm = TRUE),
+#     bias_EALSTM = median(wtemp_EALSTM - wtemp_obs, na.rm = TRUE),
+#     n_tmp = length(wtemp_obs),
+#     .groups = 'drop')
+# compare temp bias
+#
+# low_bin <- 0
+# high_bin <- 36
+# bin_w <- 2
+# bin_breaks <- seq(low_bin, high_bin, by = bin_w)
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   filter(wtemp_obs >= low_bin & wtemp_obs < high_bin) %>%
+#   mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
+#   group_by(upper_wtemp_bin) %>%
+#   summarize(bias_ERA5 = mean(wtemp_ERA5 - wtemp_obs, na.rm = TRUE),
+#             bias_LM = mean(wtemp_LM - wtemp_obs, na.rm = TRUE),
+#             bias_EALSTM = mean(wtemp_EALSTM - wtemp_obs, na.rm = TRUE))
+
+# compare summer lake-specific rmses:
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # use the Bachmann as the filter, confirmed this is only the summer data:
+#   filter(!is.na(wtemp_LM)) %>% group_by(site_id) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
+#     RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)),
+#             .groups = 'drop') %>% ungroup() %>%
+#   summarize(`med_RMSE_*ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
+#             `low_RMSE_*ERA` = quantile(`*RMSE_ERA5`, 0.25, na.rm = TRUE),
+#             `high_RMSE_*ERA` = quantile(`*RMSE_ERA5`, 0.75, na.rm = TRUE),
+#             med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
+#             `low_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.25, na.rm = TRUE),
+#             `high_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.75, na.rm = TRUE),
+#             med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
+#             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE),
+#             low_RMSE_EALSTM = quantile(RMSE_EALSTM, 0.25, na.rm = TRUE),
+#             high_RMSE_EALSTM = quantile(RMSE_EALSTM, 0.75, na.rm = TRUE))
+# summer global RMSEs:
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # use the Bachmann as the filter, confirmed this is only the summer data:
+#   filter(!is.na(wtemp_LM)) %>%
+#   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
+#             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)))
 
 add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
 
