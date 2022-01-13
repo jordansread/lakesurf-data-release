@@ -732,7 +732,11 @@ entities:
       data-max: NA
       data-units: NA
 
-purpose: Fisheries biology, limnological research, and climate science.
+purpose: >-
+  This dataset is well suited as a research complement to the fields of fisheries biology,
+  limnology, climate change science, and aquatic invasive species research. The temperature
+  predictions included here can be inputs to other models where water temperature is
+  required.
 start-date: 19800101
 end-date: 20201231
 
@@ -775,6 +779,8 @@ funding-credits: >-
   This research used resources of the Core Science Analytics and Synthesis Advanced Research Computing program at the U.S. Geological Survey.
 
 process-description: >-
+  This dataset was generated using the methodology explained in the peer-reviewed paper Willard et al. 2022. Details within that paper
+  describe how models were built and other data were assembled. Modeling environment information is captured below:
   This dataset was generated using open source tools available in the R programming language (R version 4.1.0 (2021-05-18)).
   The computing platform for generating data and metadata was x86_64-apple-darwin17.0.
   R packages loaded into this environment: ncdf4, version: 1.17; remake, version: 0.3.0; viridis, version: 0.6.1; viridisLite, version: 0.4.0;
