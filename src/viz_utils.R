@@ -31,7 +31,9 @@ plot_year_accuracy <- function(preds_obs_fl, model_id, panel_text){
   bin_breaks <- c(0, seq(1, 4.15, by = 0.05), 20)
   col_tbl <- get_rmse_col_tbl(bin_breaks)
 
-  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE)  %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5)) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date)) %>%
     # was calculating lake/season/year-specific RMSE before, then taking median.
@@ -64,13 +66,15 @@ plot_year_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   # Bachmann uses DOY 152 to 273 or 274 (depending on leap-year; https://doi.org/10.3390/geosciences9070296)
   # I verified that we don't have any LM preds outside of that range, so I'm ok filtering on it:
   # Bachmann also calls this period "Summer" even though it is a bit wider than the normal definition of summer
-  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
+  plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE)  %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5)) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date)) %>%
     # was calculating lake/season/year-specific RMSE before, then taking median.
     #    group_by(season, year, site_id) %>%
     group_by(year) %>%
-    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm=TRUE))
+    summarize(bias = median(!!rlang::sym(model_id) - wtemp_obs, na.rm=TRUE))
 
   title_text <- sprintf('%s bias (°C)', get_model_type(model_id))
 
@@ -116,9 +120,7 @@ add_panel_cue <- function(usr, x_frac, y_frac, cue_text, cex = 1.1){
   par(old_par)
 }
 plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
-  # plot yearly (median) RMSE
   # plot DoY median bias for 3 day chunks
-  # plot temperature bias for 3°C chunks
   # obs count vs RMSE
 
 
@@ -132,11 +134,13 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   # make sure the last bin is inclusive of leap year
   bin_breaks <- c(seq(low_bin, high_bin - bin_w, by = bin_w), high_bin + 10)
   plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5)) %>%
     mutate(doy = lubridate::yday(Date),
            upper_doy_bin = cut(doy, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
     # PROBABLY want to combine DOY 366 with 365 samples
     group_by(upper_doy_bin) %>%
-    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE))
+    summarize(bias = median(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE))
 
 
   title_text <- sprintf('%s prediction bias(°C)', get_model_type(model_id))
@@ -247,9 +251,7 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
 
 
 plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
-  # plot yearly (median) RMSE
-  # plot DoY median bias for 3 day chunks
-  # plot temperature bias for 3°C chunks
+  # plot median temperature bias for 3°C chunks
   # obs count vs RMSE
 
 
@@ -263,10 +265,12 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
   obs_min <- 100 # minimum number of obs in a bin for plotting
   bin_breaks <- seq(low_bin, high_bin, by = bin_w)
   plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5)) %>%
     filter(wtemp_obs >= low_bin & wtemp_obs < high_bin) %>%
     mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
     group_by(upper_wtemp_bin) %>%
-    summarize(bias = mean(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE),
+    summarize(bias = median(!!rlang::sym(model_id) - wtemp_obs, na.rm = TRUE),
               n_obs = sum(!is.na(!!rlang::sym(model_id)))) %>%
     filter(n_obs > obs_min)
 
@@ -310,6 +314,7 @@ plot_tempbin_bias <- function(preds_obs_fl, model_id, ylim, panel_text){
 plot_data_coverage <- function(centroids_sf, preds_obs_fl, panel_text){
 
   sesn_cols <- get_cols()
+  # do not filter NAs from ERA5:
   plot_data <- read_csv(preds_obs_fl, show_col_types = FALSE) %>%
     mutate(doy = lubridate::yday(Date),
            year = lubridate::year(Date),
@@ -387,7 +392,9 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
   min_obs <- 100 # minimum number of observations per cell to plot a color
   plot_proj <- get_proj()
 
-  pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
+  pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd') %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5))
 
   sites_sf <- read.csv(metadata_fl) %>%
     filter(num_obs > 0) %>%
@@ -460,6 +467,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
 plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_text){
 
   plot_proj <- get_proj()
+  # do not filter these, since this is the observational dataset, not the eval data
   pred_obs <- read_csv(preds_obs_fl, col_types = 'cDdddd')
 
   sites_sf <- read.csv(metadata_fl) %>%
@@ -590,6 +598,8 @@ plot_accuracy <- function(preds_obs_fl, cellsize, model_id, panel_text){
 
   # lat is y, lon is x. Lon comes first:
   preds_data <- read_csv(preds_obs_fl, col_types = 'cDdddd') %>%
+    # remove rows that ERA5 0.1° doesn't have coverage for:
+    filter(!is.na(wtemp_ERA5)) %>%
     filter(!is.na(!!rlang::sym(model_id)))
 
   acc_vals <- preds_data %>%
