@@ -57,7 +57,7 @@ targets:
 
   out_data/prediction_data_filehashes.yml:
     command: build_prediction_nc(target_name,
-      I('/Volumes/ThunderBlade 1/SWT_results'),
+      I('/Volumes/ThunderBlade/SWT_results'),
       export_range = I(c('1980-01-01','2020-12-31')),
       out_pattern = I('tmp/%s_predicted_temp_%s.nc'),
       dummy = I('2021-07-15'),
