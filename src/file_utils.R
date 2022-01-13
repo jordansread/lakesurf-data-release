@@ -162,6 +162,10 @@ convert_preds_tibble <- function(filein){
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_LM = sqrt(mean((wtemp_LM - wtemp_obs)^2, na.rm = TRUE)))
 
+get_era5_bias <- function(){
+  -3.31
+}
+
 add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
 
   obs_all <- read_csv(source_fl, show_col_types = FALSE) %>%
@@ -179,8 +183,9 @@ add_source_info_obs <- function(fileout, obs_pred_fl, source_fl){
     # obs_pred is a subset of source/obs_all, since the latter doesn't have the ERA5-based QAQC
     left_join(obs_all, by = c('Date','site_id')) %>%
     left_join(wqp_orgs, by = 'source') %>%
-    mutate(obs_data_source = replace_na(obs_data_source, 'unresolved')) %>%
-    select(site_id, Date, wtemp_EALSTM, wtemp_LM, wtemp_ERA5, wtemp_obs, obs_data_source) %>%
+    mutate(obs_data_source = replace_na(obs_data_source, 'unresolved'),
+           `wtemp_ERA5*` = wtemp_ERA5 - get_era5_bias()) %>%
+    select(site_id, Date, wtemp_EALSTM, wtemp_LM, wtemp_ERA5, `wtemp_ERA5*`, wtemp_obs, obs_data_source) %>%
     write_csv(file = fileout)
 
 }

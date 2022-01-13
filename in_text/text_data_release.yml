@@ -30,6 +30,7 @@ cross-cites:
     title: >-
       Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets
     pubdate: 2019
+    form: publication
     doi: https://doi.org/10.5194/hess-23-5089-2019
   -
     authors: ['Kenneth E. Mitchell','Dag Lohmann','Paul R. Houser','Eric F. Wood','John C. Schaake','Alan Robock','Brian A. Cosgrove','Justin Sheffield','Qingyun Duan','Lifeng Luo','R. Wayne Higgins','Rachel T. Pinker','J. Dan Tarpley','Dennis P. Lettenmaier','Curtis H. Marshall','Jared K. Entin','Ming Pan','Wei Shi','Victor Koren','Jesse Meng','Bruce H. Ramsay','Andrew A. Bailey']
@@ -50,7 +51,7 @@ cross-cites:
     title: >-
       Simple Features for R: Standardized Support for Spatial Vector Data
     pubdate: 2018
-    form: The R Journal
+    form: publication
     doi: 10.32614/RJ-2018-009
     link: https://doi.org/10.32614/RJ-2018-009
   -
@@ -700,6 +701,17 @@ entities:
     -
       attr-label: wtemp_ERA5
       attr-def: Predicted surface temperature from the ERA5 FLake model (Hersbach et al., 2020)
+      attr-defs: NA
+      data-min: NA
+      data-max: NA
+      data-units: degrees C
+    -
+      attr-label: >-
+        wtemp_ERA5*
+      attr-def: >-
+        Predicted surface temperature from the ERA5 FLake model
+        (Hersbach et al., 2020) with simple offset (+3.31°C; Willard et al., 2022)
+        applied for the purpose of removing a cold bias.
       attr-defs: NA
       data-min: NA
       data-max: NA
