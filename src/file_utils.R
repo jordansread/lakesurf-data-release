@@ -20,9 +20,11 @@ convert_preds_tibble <- function(filein){
            wtemp_obs = wtemp_actual)
 }
 
-# in text info:
-# compare specific lakes
-# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+# # in text info:
+# # compare specific lakes
+# read_csv('out_data/lake_surface_temp_obs_preds.csv')  %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
@@ -38,10 +40,12 @@ convert_preds_tibble <- function(filein){
 #             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
 #             n_best_deb = sum(is_best_deb),
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
-# for SPATIAL CELLS, see viz_utils, `plot_spatial_accuracy()`
-# for ERA5 CELL COUNT, see
-# compare specific years:
+# # for SPATIAL CELLS, see viz_utils, `plot_spatial_accuracy()`
+# # for ERA5 CELL COUNT, see
+# #compare specific years:
 # read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   mutate(year = lubridate::year(Date)) %>%
 #   group_by(year) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
@@ -55,8 +59,11 @@ convert_preds_tibble <- function(filein){
 #             prc_best_raw = sum(is_best_raw) / length(is_best_raw),
 #             n_best_deb = sum(is_best_deb),
 #             prc_best_deb = sum(is_best_deb) / length(is_best_raw))
-# Compare median lake-specific rmse:
-# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>% group_by(site_id) %>%
+# # Compare median lake-specific rmse:
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#      # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
+#   group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #     RMSE_ERA5 = sqrt(mean((wtemp_ERA5 - wtemp_obs)^2, na.rm = TRUE)),
 #             RMSE_EALSTM = sqrt(mean((wtemp_EALSTM - wtemp_obs)^2, na.rm = TRUE)),
@@ -69,9 +76,16 @@ convert_preds_tibble <- function(filein){
 #             `low_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.25, na.rm = TRUE),
 #             `high_RMSE_ERA` = quantile(`RMSE_ERA5`, 0.75, na.rm = TRUE),
 #             med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
-#             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE))
-# compare lake-size classes:
-# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>% group_by(site_id) %>%
+#             `low_RMSE_EALSTM` = quantile(`RMSE_EALSTM`, 0.25, na.rm = TRUE),
+#             `high_RMSE_EALSTM` = quantile(`RMSE_EALSTM`, 0.75, na.rm = TRUE),
+#             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE),
+#             `low_RMSE_LM` = quantile(`RMSE_LM`, 0.25, na.rm = TRUE),
+#             `high_RMSE_LM` = quantile(`RMSE_LM`, 0.75, na.rm = TRUE))
+# # compare lake-size classes:
+# read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
+#   group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
 #             .groups = 'drop') %>% ungroup() %>%
 #   left_join(read_csv('out_data/lake_metadata.csv'), by = "site_id") %>%
@@ -81,9 +95,12 @@ convert_preds_tibble <- function(filein){
 #     summarize(`*med_RMSE_ERA` = median(`*RMSE_ERA5`, na.rm = TRUE),
 #       med_RMSE_ERA5 = median(RMSE_ERA5, na.rm = TRUE),
 #               med_RMSE_EALSTM = median(RMSE_EALSTM, na.rm = TRUE),
-#               med_RMSE_LM = median(RMSE_LM, na.rm = TRUE))
-# compare temp bin biases:
+#               med_RMSE_LM = median(RMSE_LM, na.rm = TRUE),
+#       n_lakes = sum(!is.na(RMSE_ERA5)))
+# # compare temp bin biases:
 # read_csv('out_data/lake_surface_temp_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   mutate(temp_bin = cut( wtemp_obs, breaks = c(0, 10, 20, 30, 1000) , right = F, include.lowest = TRUE)) %>%
 #   group_by(temp_bin) %>%
 #   summarize(
@@ -92,22 +109,32 @@ convert_preds_tibble <- function(filein){
 #     bias_EALSTM = median(wtemp_EALSTM - wtemp_obs, na.rm = TRUE),
 #     n_tmp = length(wtemp_obs),
 #     .groups = 'drop')
-# compare temp bias
+# # # compare temp bias
 #
 # low_bin <- 0
 # high_bin <- 36
 # bin_w <- 2
 # bin_breaks <- seq(low_bin, high_bin, by = bin_w)
 # read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   filter(wtemp_obs >= low_bin & wtemp_obs < high_bin) %>%
-#   mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w) %>%
+#   mutate(upper_wtemp_bin = cut(wtemp_obs, breaks = bin_breaks, labels = FALSE, right = FALSE) * bin_w,
+#          total_obs = length(wtemp_obs),
+#          total_LM_obs = sum(!is.na(wtemp_LM))) %>%
 #   group_by(upper_wtemp_bin) %>%
-#   summarize(bias_ERA5 = mean(wtemp_ERA5 - wtemp_obs, na.rm = TRUE),
-#             bias_LM = mean(wtemp_LM - wtemp_obs, na.rm = TRUE),
-#             bias_EALSTM = mean(wtemp_EALSTM - wtemp_obs, na.rm = TRUE))
-
-# compare summer lake-specific rmses:
+#   summarize(bias_ERA5 = median(wtemp_ERA5 - wtemp_obs, na.rm = TRUE),
+#             bias_LM = median(wtemp_LM - wtemp_obs, na.rm = TRUE),
+#             bias_EALSTM = median(wtemp_EALSTM - wtemp_obs, na.rm = TRUE),
+#             n_obs = length(wtemp_obs),
+#             perc_obs = n_obs/first(total_obs) * 100,
+#             n_LM_obs = sum(!is.na(wtemp_LM)),
+#             perc_LM_obs = n_LM_obs/first(total_LM_obs) * 100)
+#
+# # compare summer lake-specific rmses:
 # read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   # use the Bachmann as the filter, confirmed this is only the summer data:
 #   filter(!is.na(wtemp_LM)) %>% group_by(site_id) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
@@ -125,8 +152,10 @@ convert_preds_tibble <- function(filein){
 #             med_RMSE_LM = median(RMSE_LM, na.rm = TRUE),
 #             low_RMSE_EALSTM = quantile(RMSE_EALSTM, 0.25, na.rm = TRUE),
 #             high_RMSE_EALSTM = quantile(RMSE_EALSTM, 0.75, na.rm = TRUE))
-# summer global RMSEs:
+# # summer global RMSEs:
 # read_csv('out_data/lake_surface_temp_obs_preds.csv') %>%
+#   # remove rows that ERA5 0.1° doesn't have coverage for:
+#   filter(!is.na(wtemp_ERA5)) %>%
 #   # use the Bachmann as the filter, confirmed this is only the summer data:
 #   filter(!is.na(wtemp_LM)) %>%
 #   summarize(`*RMSE_ERA5` = sqrt(mean((wtemp_ERA5 + 3.31 - wtemp_obs)^2, na.rm = TRUE)),
