@@ -166,7 +166,7 @@ build_prediction_nc <- function(hash_fileout, pred_dir, export_range, out_patter
     old_dir <- setwd(dirname(file_out))
 
     # compress and quantize the file
-
+    # need nco installed
     system(sprintf("ncks -h --fl_fmt=netcdf4 --cnk_plc=g3d --cnk_dmn time,10 --ppc %s=%s %s %s",
                    predict_metadata$name, predict_metadata$precision, basename(this_temp_file), basename(file_out)))
 
