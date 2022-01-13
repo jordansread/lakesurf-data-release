@@ -21,7 +21,7 @@ sources:
 targets:
   2_observations:
     depends:
-      - out_data/lake_surface_temp_preds.csv
+      - out_data/lake_surface_temp_obs_preds.csv
 
   # add all_outputs_and_obs_error_estimate.csv, obs and pred for all three models
 
@@ -36,10 +36,11 @@ targets:
  # UTC 5PM to be an approx noon for US central location
   out_data/obs_pred.csv:
     command: match_era5_grid2obs(target_name, obs_pred = lake_surface_temp_preds,
-      nc_fl = 'in_data/adaptor.mars.internal-1626051448.311538-8171-10-ef8eacb9-0624-4bde-8708-6f230b785a44.nc',
-      centroids_sf = modeled_centroids_sf)
+      nc_fl = 'in_data/adaptor.mars.internal-1639759493.2063537-10416-6-f31d02b2-53d8-467c-844f-f62fae559a98.nc',
+      centroids_sf = modeled_centroids_sf,
+      cell_res = I(0.1))
 
-  out_data/lake_surface_temp_preds.csv:
+  out_data/lake_surface_temp_obs_preds.csv:
     command: add_source_info_obs(target_name,
       obs_pred_fl = 'out_data/obs_pred.csv',
       source_fl = 'out_data/lake_surface_temp_obs.csv')
