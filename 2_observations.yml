@@ -40,6 +40,7 @@ targets:
       centroids_sf = modeled_centroids_sf,
       cell_res = I(0.1))
 
+# also add de-biased ERA5* per L&O:L review
   out_data/lake_surface_temp_obs_preds.csv:
     command: add_source_info_obs(target_name,
       obs_pred_fl = 'out_data/obs_pred.csv',

@@ -10,7 +10,7 @@ get_cols <- function(){
 }
 
 get_proj <- function(){
-  "+proj=lcc +lat_1=30.7 +lat_2=29.3 +lat_0=28.5 +lon_0=-91.33333333333333 +x_0=999999.9999898402 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs"
+  "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs "
 }
 
 get_model_type <- function(model_id){
@@ -459,7 +459,7 @@ plot_spatial_accuracy <- function(metadata_fl, preds_obs_fl, cellsize, model_id,
   par(old_par)
   old_par <- par(cex = 1.0)
   add_map_legend(plot_dims, bin_breaks, col_fun = viridis::inferno, col_fun_dir = 1L,
-                 title = "", y_frac = 0.13, total_leg_prc = 0.25)
+                 title = "", y_frac = 0.08, total_leg_prc = 0.25)
   par(old_par)
 }
 
@@ -522,6 +522,7 @@ plot_spatial_coverage <- function(metadata_fl, preds_obs_fl, cellsize, panel_tex
                  col_fun = viridis::mako, col_fun_dir = -1L,
                  title = 'Number of observed lakes (#)',
                  leg_title_cex = 1.15,
+                 y_frac = 0,
                  x_frac = 0,
                  total_leg_prc = 0.4)
 

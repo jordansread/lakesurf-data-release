@@ -1,10 +1,10 @@
 filepath,sb_id,time_uploaded_to_sb
-out_data/lake_metadata.csv,60341c3ed34eb12031172aa6,2021-08-17 15:38 UTC
-out_data/lake_surface_temp_preds.csv,60341c3ed34eb12031172aa6,2021-08-17 15:39 UTC
-out_xml/data_release_metadata.xml,60341c3ed34eb12031172aa6,2021-09-13 23:29 UTC
-tmp/01_predicted_temp_N24-53_W98-126.nc,60341c3ed34eb12031172aa6,2021-08-17 16:33 UTC
+out_data/lake_metadata.csv,60341c3ed34eb12031172aa6,2022-01-09 13:05 UTC
+out_data/lake_surface_temp_obs_preds.csv,60341c3ed34eb12031172aa6,2022-01-13 19:57 UTC
+out_xml/data_release_metadata.xml,60341c3ed34eb12031172aa6,2022-01-13 19:57 UTC
+tmp/01_predicted_temp_N24-53_W98-126.nc,60341c3ed34eb12031172aa6,2022-01-09 13:20 UTC
 tmp/01_weather_N24-53_W98-126.nc,60341c3ed34eb12031172aa6,2021-07-22 15:41 UTC
-tmp/02_predicted_temp_N40-53_W67-98.nc,60341c3ed34eb12031172aa6,2021-08-17 20:25 UTC
+tmp/02_predicted_temp_N40-53_W67-98.nc,60341c3ed34eb12031172aa6,2022-01-09 13:33 UTC
 tmp/02_weather_N40-53_W67-98.nc,60341c3ed34eb12031172aa6,2021-07-22 15:48 UTC
-tmp/03_predicted_temp_N24-40_W67-98.nc,60341c3ed34eb12031172aa6,2021-08-17 15:56 UTC
+tmp/03_predicted_temp_N24-40_W67-98.nc,60341c3ed34eb12031172aa6,2022-01-09 13:46 UTC
 tmp/03_weather_N24-40_W67-98.nc,60341c3ed34eb12031172aa6,2021-07-22 15:57 UTC

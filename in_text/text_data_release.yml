@@ -773,7 +773,10 @@ metadata-state: WI
 metadata-zip: 53562
 metadata-date: !expr format(Sys.time(),'%Y%m%d')
 
-accur-test: No formal attribute accuracy tests were conducted.
+accur-test: >-
+  No formal attribute accuracy tests were conducted for spatial data. For model prediction,
+  accuracy and bias was assessed. See Willard et al. 2022 for methodological details
+  and results of this assessment.
 funding-credits: >-
   This study was funded by the Department of the Interior Midwest Climate Adaptation Science Center.
   This research used resources of the Core Science Analytics and Synthesis Advanced Research Computing program at the U.S. Geological Survey.
