@@ -1,12 +1,12 @@
 title: >-
-  Data release: Daily surface temperatures for 185,549 lakes in the Contiguous United States estimated using deep learning (1980-2020)
+  Daily surface temperature predictions for 185,549 U.S. lakes with associated observations and meteorological conditions (1980-2020)
 
 
 abstract: >-
-  The data release of daily lake surface temperatures comprises 185,549 lakes across the continental United States from
-  1980 to 2020 that are generated using an entity-aware long short-term memory deep learning model. In-situ measurements
-  used for model training spanned a subset of 12,227 lakes. Model training was optimized for prediction on unmonitored
-  lakes through a cross validation framework. Median per-lake estimated error found through cross validation on lakes with
+  Daily lake surface temperatures estimates for 185,549 lakes across the contiguous United States from
+  1980 to 2020 generated using an entity-aware long short-term memory deep learning model. In-situ measurements
+  used for model training and evaluation are from 12,227 lakes and are included as well as daily
+  meteorological conditions and lake properties. Median per-lake estimated error found through cross validation on lakes with
   in-situ surface temperature observations was 1.24 °C. The generated dataset will be beneficial for a wide range of
   applications including estimations of thermal habitats and the impacts of climate change on inland lakes.
 
@@ -21,7 +21,7 @@ larger-cites:
   -
     authors: ["Jared Willard", "Jordan S. Read", "Simon N. Topp", "Gretchen J.A. Hansen", "Vipin Kumar"]
     title: >-
-      Daily surface temperatures for 185,549 lakes in the Conterminous United States estimated using deep learning (1980-2020)
+      Daily surface temperatures for 185,549 lakes in the conterminous United States estimated using deep learning (1980-2020)
     pubdate: 2022
     form: publication
 cross-cites:
