@@ -148,6 +148,7 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   old_par <- par(mai = c(0,0,0,0), cex= 1.1, las = 1, mgp = c(2,.5,0))
 
   zer_bias_r <- 6
+  jan_flag_r <- c(3.5, 5.1)
 
   plot(NA, NA, ylim = c(-zer_bias_r - 2, zer_bias_r + 2), xlim = c(-zer_bias_r - 2, zer_bias_r + 2),
        ylab = title_text,
@@ -205,11 +206,39 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
       adj[2L] <- adj[2L] - 0.1
     }
     par(cex = 1.2)
-    text(x0, y0, seasons[1L], srt = rotate_angle, adj = adj)
+    if (model_id == 'wtemp_EALSTM'){
+      # plot season text only for one of the panels
+      text(x0, y0, seasons[1L], srt = rotate_angle, adj = adj)
+    }
     seasons <- tail(seasons, -1L)
   }
 
+  if (model_id == 'wtemp_EALSTM'){
+    doy <- 1
+    alpha <- 2*pi * doy / 366
+    xs <- sin(alpha) * (jan_flag_r + 2)
+    ys <- cos(alpha) * (jan_flag_r + 2)
+    lines(xs, ys, lwd = 1.5)
 
+    text(xs[2],ys[2], substitute(paste(italic('Jan 1'))), pos = 3, offset = 0.2, cex = 0.65)
+  } else if (model_id == 'wtemp_ERA5'){
+    doy <- 27
+    alpha <- 2*pi * doy / 366
+    x0 <- sin(alpha) * (zer_bias_r + get_era5_bias())
+    y0 <- cos(alpha) * (zer_bias_r + get_era5_bias())
+    doy <- 24
+    alpha <- 2*pi * doy / 366
+    x1 <- sin(alpha) * (zer_bias_r + get_era5_bias() - 0.5)
+    y1 <- cos(alpha) * (zer_bias_r + get_era5_bias() - 0.5)
+
+    lines(c(x0,x1), c(y0,y1), lwd = 1)
+
+    text(x1,y1, substitute(paste(italic('-3.31°C'))), pos = 1, offset = 0.25, cex = 0.55)
+    text(x1,y1, substitute(paste(italic('bias'))), pos = 1, offset = 0.75, cex = 0.55)
+  }
+
+
+  # text placement
   biases <- c("+1°C" = 0.85, "0°C" = -0.05, "-1°C" = -1.15, "-2°C" = -2.15, "-3°C" = -3.15)
   avoid_alphas <- tibble(values = c(-1:3), div = c(5,5,5,4,4), avoid_alpha = NA)
   doy <- 105
@@ -226,6 +255,7 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
   }
 
 
+  # rings, which skip dashes for text placement
   cnt = 0
   for (doy in seq(0, 366, by = 1)){
     cnt = cnt+1
@@ -236,10 +266,21 @@ plot_doy_bias <- function(preds_obs_fl, model_id, panel_text){
     for (bias in avoid_alphas$values){
       this_alpha <- avoid_alphas %>% filter(values == bias)
       skip_range <- (round(this_alpha$avoid_alpha, 0) - 4):(round(this_alpha$avoid_alpha, 0) + 4)
-      # whether to plot dash:
+      # whether to plot dash (skip for both the empty part of the dash and text overlap):
       if (cnt %% this_alpha$div != 0 & !(doy %in% skip_range)){
         lines((-bias + zer_bias_r) * c(sin(upper_alpha), sin(lower_alpha)), (-bias + zer_bias_r) * c(cos(upper_alpha), cos(lower_alpha)),
               col = 'grey20', lwd = 0.5)
+      }
+    }
+    if (model_id == 'wtemp_ERA5'){
+      bias <- -get_era5_bias()
+      if (!doy %in% skip_range){
+        lines((-bias + zer_bias_r) * c(sin(upper_alpha), sin(lower_alpha)), (-bias + zer_bias_r) * c(cos(upper_alpha), cos(lower_alpha)),
+              col = 'black', lwd = 0.95)
+        if (cnt %% 5 == 0){
+          lines((-bias + zer_bias_r) * c(sin(upper_alpha), sin(lower_alpha)), (-bias + zer_bias_r) * c(cos(upper_alpha), cos(lower_alpha)),
+                col = 'grey70', lwd = 1)
+        }
       }
     }
 

@@ -32,7 +32,7 @@ targets:
     command: subset_tbl(metadata_tbl, I('site_id'),
       I('lake_lon_deg'), I('lake_lat_deg'))
 
- # ERA5 data from https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels
+ # ERA5 data from https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.e2161bac %>%
  # UTC 5PM to be an approx noon for US central location
   out_data/obs_pred.csv:
     command: match_era5_grid2obs(target_name, obs_pred = lake_surface_temp_preds,
